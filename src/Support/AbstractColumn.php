@@ -15,9 +15,9 @@ abstract class AbstractColumn
 {
     use Concerns\EvaluatesClosures;
     use Concerns\FactoryPattern;
+    use Concerns\Shared\BelongsToId;
     use Concerns\Shared\BelongsToLabel;
     use Concerns\Shared\BelongsToName;
-    use Concerns\Shared\BelongsToId;
 
     protected Closure|array $column = [];
 
@@ -32,6 +32,7 @@ abstract class AbstractColumn
 
         //
     }
+
     /**
      * Serialização para o payload do frontend (Vue, React, Livewire, Blade).
      */
