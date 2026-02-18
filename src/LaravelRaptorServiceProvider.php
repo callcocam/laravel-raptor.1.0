@@ -26,4 +26,14 @@ class LaravelRaptorServiceProvider extends PackageServiceProvider
             ->hasMigration('create_laravel_raptor_table')
             ->hasCommand(LaravelRaptorCommand::class);
     }
+
+    public function packageBooted(): void
+    {
+        $raptor = $this->app->make(LaravelRaptor::class);
+        foreach (config('raptor.component_callbacks', []) as $entry) {
+            if (isset($entry['component'], $entry['action'], $entry['callback']) && is_callable($entry['callback'])) {
+                $raptor->registerComponentCallback($entry['component'], $entry['action'], $entry['callback']);
+            }
+        }
+    }
 }
