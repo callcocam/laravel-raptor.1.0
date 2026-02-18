@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by Claudio Campos.
  * User: callcocam@gmail.com, contato@sigasmart.com.br
@@ -11,6 +12,5 @@ use Closure;
 
 abstract class AbstractColumn
 {
-
     protected Closure|array $column = [];
 }
