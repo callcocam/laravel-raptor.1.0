@@ -8,15 +8,15 @@
 
 namespace Callcocam\LaravelRaptor\Http\Controllers;
 
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Foundation\Validation\ValidatesRequests;
-use Illuminate\Routing\Controller as BaseController;
-use Inertia\Inertia;
-use Illuminate\Http\Request;
-use Illuminate\Database\Eloquent\Model;
-use Callcocam\LaravelRaptor\Support\Table\TableBuilder;
 use Callcocam\LaravelRaptor\Support\Form\FormBuilder;
 use Callcocam\LaravelRaptor\Support\Info\InfoBuilder;
+use Callcocam\LaravelRaptor\Support\Table\TableBuilder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Foundation\Validation\ValidatesRequests;
+use Illuminate\Http\Request;
+use Illuminate\Routing\Controller as BaseController;
+use Inertia\Inertia;
 
 class AbstractController extends BaseController
 {
@@ -24,65 +24,62 @@ class AbstractController extends BaseController
 
     /**
      * The model to be used in the controller.
-     * @var Model|string|null
      */
     protected Model|string|null $model = null;
 
     /**
      * The table builder to be used in the controller.
-     * @var string|null
      */
     protected ?string $tableBuilder = null;
+
     /**
      * The form builder to be used in the controller.
-     * @var string|null
      */
     protected ?string $formBuilder = null;
+
     /**
      * The info builder to be used in the controller.
-     * @var string|null
      */
     protected ?string $infoBuilder = null;
 
-
     /**
      * Get the model to be used in the controller.
-     * @return Model
      */
     protected function getModel(): Model
     {
         return $this->model instanceof Model ? $this->model : app($this->model);
     }
 
-
     protected function getIndexPage(): string
     {
-        return "crud/index";
+        return 'crud/index';
     }
 
     protected function getCreatePage(): string
     {
-        return "crud/create";
+        return 'crud/create';
     }
 
     protected function getEditPage(): string
     {
-        return "crud/edit";
+        return 'crud/edit';
     }
 
     protected function getShowPage(): string
     {
-        return "crud/show";
+        return 'crud/show';
     }
 
     protected function table(TableBuilder $table): TableBuilder
     {
         return $table;
     }
+
     protected function form(FormBuilder $form): FormBuilder
     {
         return $form;
     }
+
     protected function info(InfoBuilder $info): InfoBuilder
     {
         return $info;
@@ -93,26 +90,31 @@ class AbstractController extends BaseController
         if ($this->tableBuilder) {
             return app($this->tableBuilder, ['request' => $request]);
         }
+
         return new TableBuilder($request);
     }
+
     protected function getFormBuilder(Request $request): ?FormBuilder
     {
         if ($this->formBuilder) {
             return app($this->formBuilder, ['request' => $request]);
         }
+
         return new FormBuilder($request);
     }
+
     protected function getInfoBuilder(Request $request): ?InfoBuilder
     {
         if ($this->infoBuilder) {
             return app($this->infoBuilder, ['request' => $request]);
         }
+
         return new InfoBuilder($request);
     }
 
     /**
      * Display a listing of the resource.
-     * @param Request $request
+     *
      * @return InertiaResponse
      */
     public function index(Request $request)
@@ -151,12 +153,14 @@ class AbstractController extends BaseController
         if ($model) {
             $model->delete();
         }
+
         return redirect()->route($this->getIndexPage());
     }
 
     public function store(Request $request)
     {
         $model = $this->getModel()->create($request->all());
+
         return redirect()->route($this->getIndexPage());
     }
 
@@ -166,6 +170,7 @@ class AbstractController extends BaseController
         if ($model) {
             $model->update($request->all());
         }
+
         return redirect()->route($this->getIndexPage());
     }
 }

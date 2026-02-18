@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by Claudio Campos.
  * User: callcocam@gmail.com, contato@sigasmart.com.br
@@ -9,7 +10,7 @@ namespace Callcocam\LaravelRaptor\Support\Table\Columns;
 
 use Callcocam\LaravelRaptor\Support\AbstractColumn;
 
-abstract class Column extends AbstractColumn
+class Column extends AbstractColumn
 {
      
 }
