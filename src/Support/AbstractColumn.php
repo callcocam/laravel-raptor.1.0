@@ -10,7 +10,6 @@ namespace Callcocam\LaravelRaptor\Support;
 
 use Closure;
 use Illuminate\Support\Str;
-use Callcocam\LaravelRaptor\Support\Concerns;
 
 abstract class AbstractColumn
 {
