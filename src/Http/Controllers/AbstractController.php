@@ -88,10 +88,10 @@ class AbstractController extends BaseController
     protected function getTableBuilder(Request $request): ?TableBuilder
     {
         if ($this->tableBuilder) {
-            return app($this->tableBuilder, ['request' => $request]);
+            return app($this->tableBuilder, ['request' => $request, 'model' => $this->getModel()]);
         }
 
-        return new TableBuilder($request);
+        return new TableBuilder($request, $this->getModel());
     }
 
     protected function getFormBuilder(Request $request): ?FormBuilder
