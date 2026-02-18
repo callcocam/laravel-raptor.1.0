@@ -17,7 +17,7 @@ trait BelongsToSortable
     /**
      * Coluna do banco para ordenação (quando diferente do name da coluna).
      */
-    protected ?string $sortColumn = null;
+    protected Closure|string|null $sortColumn = null;
 
     public function sortable(Closure|bool $value = true): static
     {
@@ -26,7 +26,7 @@ trait BelongsToSortable
         return $this;
     }
 
-    public function sortColumn(Closure|string $column): static
+    public function sortColumn(Closure|string|null $column): static
     {
         $this->sortColumn = $column;
 
