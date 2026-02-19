@@ -21,11 +21,11 @@ use Illuminate\Support\Str;
 
 class Page
 {
-    use EvaluatesClosures;
-    use FactoryPattern;
     use BelongsToIcon;
     use BelongsToLabel;
     use BelongsToName;
+    use EvaluatesClosures;
+    use FactoryPattern;
 
     protected string $slug;
 
@@ -269,7 +269,7 @@ class Page
             $routeGroup->middleware($this->middleware);
         }
 
-        $routeGroup->group(function () use ($controller, $name) {
+        $routeGroup->group(function () use ($controller) {
             Route::get('/', [$controller, 'index'])->name('index');
 
             if ($this->hasCreate) {
