@@ -11,12 +11,18 @@ namespace Callcocam\LaravelRaptor\Support\Shinobi\Models;
 use Callcocam\LaravelRaptor\Models\AbstractModel;
 use Callcocam\LaravelRaptor\Support\Shinobi\Concerns\RefreshesPermissionCache;
 use Callcocam\LaravelRaptor\Support\Shinobi\Contracts\Permission as PermissionContract;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Permission extends AbstractModel implements PermissionContract
 {
-    use RefreshesPermissionCache, SoftDeletes;
+    use HasFactory, RefreshesPermissionCache, SoftDeletes;
+
+    protected static function newFactory(): \Callcocam\LaravelRaptor\Database\Factories\PermissionFactory
+    {
+        return \Callcocam\LaravelRaptor\Database\Factories\PermissionFactory::new();
+    }
 
     /**
      * Permissions são globais — não participam do tenant scoping.

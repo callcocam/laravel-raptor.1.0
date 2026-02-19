@@ -12,6 +12,7 @@ use Callcocam\LaravelRaptor\Commands\LaravelRaptorCommand;
 use Callcocam\LaravelRaptor\Commands\SyncPermissionsCommand;
 use Callcocam\LaravelRaptor\Support\Landlord\LandlordServiceProvider;
 use Callcocam\LaravelRaptor\Support\Shinobi\ShinobiServiceProvider;
+use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 
@@ -23,9 +24,21 @@ class LaravelRaptorServiceProvider extends PackageServiceProvider
             ->name('laravel-raptor')
             ->hasConfigFile()
             ->hasViews()
-            ->hasMigration('create_laravel_raptor_table')
+            ->hasMigrations([
+                'create_tenants_table',
+                'create_tenant_domains_table', 
+                'create_roles_table',
+                'create_role_user_table',
+                'create_permissions_table',
+                'create_permission_role_table',
+                'create_permission_user_table',
+            ])
             ->hasCommand(LaravelRaptorCommand::class)
-            ->hasCommand(SyncPermissionsCommand::class);
+            ->hasCommand(SyncPermissionsCommand::class)
+            ->hasInstallCommand(function (InstallCommand $command) {
+               /* TODO: Implementar o comando de instalação */ 
+               $command->publishMigrations()->askToRunMigrations();
+            });
     }
 
     public function packageRegistered(): void
