@@ -33,6 +33,7 @@ class TableBuilder
     use WithFilters;
     use WithHeaderActions;
     use WithSummarizers;
+
     /**
      * @var Closure|array<int, AbstractColumn>
      */

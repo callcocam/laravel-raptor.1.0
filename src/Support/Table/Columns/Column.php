@@ -20,15 +20,13 @@ class Column extends AbstractColumn
     use BelongsToSearchable;
     use BelongsToSortable;
 
-
-
     protected ?Closure $formatting = null;
 
     public function formatting(Closure $formatting): static
     {
         $this->formatting = $formatting;
 
-        return $this; 
+        return $this;
     }
 
     public function getFormattedValue(mixed $value, mixed $row = null): mixed
