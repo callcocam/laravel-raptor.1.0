@@ -9,6 +9,9 @@
 namespace Callcocam\LaravelRaptor;
 
 use Callcocam\LaravelRaptor\Commands\LaravelRaptorCommand;
+use Callcocam\LaravelRaptor\Commands\SyncPermissionsCommand;
+use Callcocam\LaravelRaptor\Support\Landlord\LandlordServiceProvider;
+use Callcocam\LaravelRaptor\Support\Shinobi\ShinobiServiceProvider;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 
@@ -16,26 +19,19 @@ class LaravelRaptorServiceProvider extends PackageServiceProvider
 {
     public function configurePackage(Package $package): void
     {
-        /*
-         * This class is a Package Service Provider
-         *
-         * More info: https://github.com/spatie/laravel-package-tools
-         */
         $package
             ->name('laravel-raptor')
             ->hasConfigFile()
             ->hasViews()
             ->hasMigration('create_laravel_raptor_table')
-            ->hasCommand(LaravelRaptorCommand::class);
+            ->hasCommand(LaravelRaptorCommand::class)
+            ->hasCommand(SyncPermissionsCommand::class);
     }
 
-    public function packageBooted(): void
+    public function packageRegistered(): void
     {
-        $raptor = $this->app->make(LaravelRaptor::class);
-        foreach (config('raptor.component_callbacks', []) as $entry) {
-            if (isset($entry['component'], $entry['action'], $entry['callback']) && is_callable($entry['callback'])) {
-                $raptor->registerComponentCallback($entry['component'], $entry['action'], $entry['callback']);
-            }
-        }
+        $this->app->singleton(LaravelRaptor::class);
+        $this->app->register(LandlordServiceProvider::class);
+        $this->app->register(ShinobiServiceProvider::class);
     }
 }

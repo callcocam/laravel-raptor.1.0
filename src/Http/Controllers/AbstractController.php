@@ -11,12 +11,14 @@ namespace Callcocam\LaravelRaptor\Http\Controllers;
 use Callcocam\LaravelRaptor\Support\Actions\Types\CallbackAction;
 use Callcocam\LaravelRaptor\Support\Form\FormBuilder;
 use Callcocam\LaravelRaptor\Support\Info\InfoBuilder;
+use Callcocam\LaravelRaptor\Support\Navigation\Page;
 use Callcocam\LaravelRaptor\Support\Table\TableBuilder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
+use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 
 class AbstractController extends BaseController
@@ -49,6 +51,55 @@ class AbstractController extends BaseController
     protected function getModel(): Model
     {
         return $this->model instanceof Model ? $this->model : app($this->model);
+    }
+
+    /**
+     * Retorna a Page de navegação deste recurso (sidebar, rotas).
+     * Sobrescreva no controller para registrar a página; padrão null = não registra.
+     *
+     * @return Page|null
+     */
+    public function getPage(): ?Page
+    {
+        return null;
+    }
+
+    /**
+     * Retorna todas as Pages de navegação deste controller.
+     * Padrão: um único item se getPage() retornar não nulo. Sobrescreva para múltiplas páginas.
+     *
+     * @return array<Page>
+     */
+    public function getPages(): array
+    {
+        $page = $this->getPage();
+
+        return $page !== null ? [$page] : [];
+    }
+
+    /**
+     * Autoriza pela ability de rota (ex.: products.index).
+     * Shinobi verifica primeiro hasPermissionTo($ability); fallback é a Policy.
+     *
+     * @param  Model|null  $model  Obrigatório para show, edit, update, destroy.
+     */
+    protected function authorizeRoute(string $ability, ?Model $model = null): void
+    {
+        $page = $this->getPage();
+        if ($page === null) {
+            return;
+        }
+
+        $key = $page->getRouteName().'.'.$ability;
+        if (! Gate::has($key)) {
+            return;
+        }
+
+        if ($model !== null) {
+            $this->authorize($key, $model);
+        } else {
+            $this->authorize($key);
+        }
     }
 
     protected function getIndexPage(): string
@@ -120,6 +171,8 @@ class AbstractController extends BaseController
      */
     public function index(Request $request)
     {
+        $this->authorizeRoute('index');
+
         return Inertia::render($this->getIndexPage(), [
             'table' => $this->table($this->getTableBuilder($request))->render(),
         ]);
@@ -127,6 +180,8 @@ class AbstractController extends BaseController
 
     public function create(Request $request)
     {
+        $this->authorizeRoute('create');
+
         return Inertia::render($this->getCreatePage(), [
             'form' => $this->form($this->getFormBuilder($request))->render(),
         ]);
@@ -134,6 +189,9 @@ class AbstractController extends BaseController
 
     public function edit(Request $request, string $id)
     {
+        $model = $this->getModel()->findOrFail($id);
+        $this->authorizeRoute('edit', $model);
+
         return Inertia::render($this->getEditPage(), [
             'id' => $id,
             'form' => $this->form($this->getFormBuilder($request))->render(),
@@ -142,6 +200,9 @@ class AbstractController extends BaseController
 
     public function show(Request $request, string $id)
     {
+        $model = $this->getModel()->findOrFail($id);
+        $this->authorizeRoute('show', $model);
+
         return Inertia::render($this->getShowPage(), [
             'id' => $id,
             'info' => $this->info($this->getInfoBuilder($request))->render(),
@@ -150,16 +211,18 @@ class AbstractController extends BaseController
 
     public function destroy(Request $request, string $id)
     {
-        $model = $this->getModel()->find($id);
-        if ($model) {
-            $model->delete();
-        }
+        $model = $this->getModel()->findOrFail($id);
+        $this->authorizeRoute('destroy', $model);
+
+        $model->delete();
 
         return redirect()->route($this->getIndexPage());
     }
 
     public function store(Request $request)
     {
+        $this->authorizeRoute('store');
+
         $model = $this->getModel()->create($request->all());
 
         return redirect()->route($this->getIndexPage());
@@ -167,10 +230,10 @@ class AbstractController extends BaseController
 
     public function update(Request $request, string $id)
     {
-        $model = $this->getModel()->find($id);
-        if ($model) {
-            $model->update($request->all());
-        }
+        $model = $this->getModel()->findOrFail($id);
+        $this->authorizeRoute('update', $model);
+
+        $model->update($request->all());
 
         return redirect()->route($this->getIndexPage());
     }
