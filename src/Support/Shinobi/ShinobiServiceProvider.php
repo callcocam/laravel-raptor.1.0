@@ -47,8 +47,6 @@ class ShinobiServiceProvider extends ServiceProvider
 
     /**
      * Register the permission gates.
-     *
-     * @return void
      */
     protected function registerGates(): void
     {

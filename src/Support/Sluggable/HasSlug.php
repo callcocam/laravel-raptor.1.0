@@ -16,17 +16,11 @@ trait HasSlug
 {
     protected ?SlugOptions $slugOptions = null;
 
-    /**
-     * @return string|bool
-     */
     protected function slugTo(): string|bool
     {
         return config('raptor.sluggable.slug', 'slug');
     }
 
-    /**
-     * @return string|bool
-     */
     protected function slugFrom(): string|bool
     {
         return config('raptor.sluggable.name', 'name');

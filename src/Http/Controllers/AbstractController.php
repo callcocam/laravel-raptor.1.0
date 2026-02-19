@@ -56,8 +56,6 @@ class AbstractController extends BaseController
     /**
      * Retorna a Page de navegação deste recurso (sidebar, rotas).
      * Sobrescreva no controller para registrar a página; padrão null = não registra.
-     *
-     * @return Page|null
      */
     public function getPage(): ?Page
     {
