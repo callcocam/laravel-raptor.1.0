@@ -31,12 +31,12 @@ class DatabaseSource extends AbstractSource
      */
     protected function getModifiers(): array
     {
-        return [
+        return array_merge([
             new ApplyEagerLoading,
             new ApplySearch,
             new ApplyFilters,
             new ApplySort,
-        ];
+        ], config('raptor.sources.database.modifiers', []));
     }
 
     public function getData(Request $request, ?TableQueryContext $context = null): LengthAwarePaginator|array
@@ -47,7 +47,7 @@ class DatabaseSource extends AbstractSource
 
         $query = $this->buildQuery($request, $context);
 
-        $perPage = (int) $request->get('per_page', 15);
+        $perPage = (int) $request->input('per_page', 15);
         $perPage = $perPage >= 1 && $perPage <= 100 ? $perPage : 15;
 
         return $query->paginate($perPage);
@@ -86,6 +86,34 @@ class DatabaseSource extends AbstractSource
     protected function baseQuery(): Builder
     {
         return $this->model->newQuery();
+    }
+
+    /**
+     * Calcula aggregates globais (sobre TODOS os registros filtrados, não só a página).
+     *
+     * @param  array<int, \Callcocam\LaravelRaptor\Support\Table\Summarizers\Summarizer>  $summarizers
+     * @return array<string, mixed>
+     */
+    public function getSummary(Request $request, ?TableQueryContext $context, array $summarizers): array
+    {
+        if ($this->model === null || count($summarizers) === 0) {
+            return [];
+        }
+
+        $query = $this->buildQuery($request, $context);
+        $results = [];
+
+        foreach ($summarizers as $summarizer) {
+            $key = $summarizer->getFunction().'_'.$summarizer->getColumn();
+            $results[$key] = [
+                'value' => $summarizer->computeFromQuery(clone $query),
+                'label' => $summarizer->getLabel(),
+                'column' => $summarizer->getColumn(),
+                'function' => $summarizer->getFunction(),
+            ];
+        }
+
+        return $results;
     }
 
     /**

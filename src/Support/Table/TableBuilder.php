@@ -9,9 +9,14 @@
 namespace Callcocam\LaravelRaptor\Support\Table;
 
 use Callcocam\LaravelRaptor\Support\AbstractColumn;
+use Callcocam\LaravelRaptor\Support\Actions\AbstractAction;
 use Callcocam\LaravelRaptor\Support\Concerns\EvaluatesClosures;
+use Callcocam\LaravelRaptor\Support\Concerns\Interacts\WithActions;
+use Callcocam\LaravelRaptor\Support\Concerns\Interacts\WithBulkActions;
 use Callcocam\LaravelRaptor\Support\Concerns\Interacts\WithColumns;
 use Callcocam\LaravelRaptor\Support\Concerns\Interacts\WithFilters;
+use Callcocam\LaravelRaptor\Support\Concerns\Interacts\WithHeaderActions;
+use Callcocam\LaravelRaptor\Support\Concerns\Interacts\WithSummarizers;
 use Callcocam\LaravelRaptor\Support\Sources\DatabaseSource;
 use Callcocam\LaravelRaptor\Support\Sources\SourceContract;
 use Closure;
@@ -22,13 +27,21 @@ use Illuminate\Http\Request;
 class TableBuilder
 {
     use EvaluatesClosures;
+    use WithActions;
+    use WithBulkActions;
     use WithColumns;
     use WithFilters;
-
+    use WithHeaderActions;
+    use WithSummarizers;
     /**
      * @var Closure|array<int, AbstractColumn>
      */
     protected Closure|array $columns = [];
+
+    /**
+     * @var Closure|array<int, FilterBuilder>
+     */
+    protected Closure|array $filters = [];
 
     protected ?SourceContract $source = null;
 
@@ -43,7 +56,10 @@ class TableBuilder
 
     /**
      * Payload pronto para o frontend (Vue, React, Livewire, Blade).
-     * Dados já tratados no backend: colunas serializadas + linhas com valores formatados + meta.
+     *
+     * - columns: metadata das colunas (uma vez só)
+     * - data: linhas com apenas valores formatados (leve)
+     * - meta: paginação
      */
     public function render(): array
     {
@@ -51,25 +67,47 @@ class TableBuilder
         $context = new TableQueryContext($resolvedColumns, $this->getResolvedFilters());
 
         $source = $this->getSource();
-        $data = $source->getData($this->request, $context);
+        $result = $source->getData($this->request, $context);
 
-        $items = $data instanceof LengthAwarePaginator
-            ? $data->items()
-            : $data['data'] ?? [];
-        $meta = $data instanceof LengthAwarePaginator
-            ? $this->paginatorMeta($data)
-            : ($data['meta'] ?? ['total' => $data['total'] ?? 0]);
-
-        $rows = [];
-        foreach ($items as $row) {
-            $rows[] = $this->buildRow($row, $resolvedColumns);
+        if ($result instanceof LengthAwarePaginator) {
+            $items = $result->items();
+            $meta = $this->paginatorMeta($result);
+        } else {
+            $items = $result['data'] ?? [];
+            $meta = $result['meta'] ?? ['total' => $result['total'] ?? 0];
         }
 
-        return [
+        $rows = array_map(
+            fn ($item) => $this->buildRow($item, $resolvedColumns),
+            $items
+        );
+
+        $payload = [
             'columns' => array_map(fn (AbstractColumn $col) => $col->toArray(), $resolvedColumns),
             'data' => $rows,
             'meta' => $meta,
         ];
+
+        if ($this->hasActions()) {
+            $payload['actions'] = array_map(
+                fn (AbstractAction $action) => $action->toArray(),
+                $this->getActions()
+            );
+        }
+
+        if ($this->hasHeaderActions()) {
+            $payload['headerActions'] = $this->renderStaticActions($this->getHeaderActions());
+        }
+
+        if ($this->hasBulkActions()) {
+            $payload['bulkActions'] = $this->renderStaticActions($this->getBulkActions());
+        }
+
+        if ($this->hasSummarizers()) {
+            $payload['summary'] = $this->buildSummary($source, $context, $rows);
+        }
+
+        return $payload;
     }
 
     protected function getSource(): SourceContract
@@ -112,64 +150,140 @@ class TableBuilder
     }
 
     /**
-     * @param  array<int, AbstractColumn>  $columns
-     * @return array<string, mixed>
+     * Calcula os summaries da página e o total geral.
+     *
+     * @param  array<int, array<string, mixed>>  $rows  Linhas já formatadas da página
+     * @return array{page: array, global: array}
      */
-    protected function buildRow(Model|array $row, array $columns): array
+    protected function buildSummary(SourceContract $source, TableQueryContext $context, array $rows): array
     {
-        $out = [];
+        $summarizers = $this->getSummarizers();
 
-        foreach ($columns as $column) {
-            $name = $column->getName();
-            $value = $this->resolveValue($row, $column);
-            $out[$name] = $column->render($value, $row);
+        $pageSummary = [];
+        foreach ($summarizers as $summarizer) {
+            $key = $summarizer->getFunction().'_'.$summarizer->getColumn();
+            $pageSummary[$key] = [
+                'value' => $summarizer->computeFromRows($rows),
+                'label' => $summarizer->getLabel(),
+                'column' => $summarizer->getColumn(),
+                'function' => $summarizer->getFunction(),
+            ];
         }
 
-        if ($row instanceof Model && $row->getKey()) {
-            $out['id'] = $row->getKey();
-        }
+        $globalSummary = $source->getSummary($this->request, $context, $summarizers);
 
-        return $out;
+        return [
+            'page' => $pageSummary,
+            'global' => $globalSummary,
+        ];
     }
 
     /**
-     * Resolve o valor da coluna, incluindo dot notation para relationships.
-     * Ex: "user.name" → $row->user->name (eager loaded)
+     * Monta uma linha com só os valores formatados + id + actions.
+     * Sem metadata de colunas — o front cruza com `columns` pelo name.
+     *
+     * @param  array<int, AbstractColumn>  $columns
+     * @return array<string, mixed>
      */
-    protected function resolveValue(Model|array $row, AbstractColumn $column): mixed
+    protected function buildRow(mixed $item, array $columns): array
+    {
+        $row = [];
+
+        if ($item instanceof Model && $item->getKey()) {
+            $row['id'] = $item->getKey();
+        }
+
+        foreach ($columns as $column) {
+            $name = $column->getName();
+            $value = $this->resolveValue($item, $column);
+            $row[$name] = $column->render($value, $item);
+        }
+
+        if ($item instanceof Model) {
+            $row['actions'] = $this->evaluateActionsAuthorization($item);
+        }
+
+        return $row;
+    }
+
+    /**
+     * Resolve o valor incluindo dot notation para relationships.
+     */
+    protected function resolveValue(mixed $item, AbstractColumn $column): mixed
     {
         if (method_exists($column, 'isRelationship') && $column->isRelationship()) {
             $path = $column->getRelationshipPath();
             $field = $column->getRelationshipColumn();
 
-            if ($row instanceof Model) {
-                $related = data_get($row, $path);
+            if ($item instanceof Model) {
+                $related = data_get($item, $path);
 
                 return $related !== null ? data_get($related, $field) : null;
             }
-
-            return data_get($row, $column->getName());
         }
 
-        if ($row instanceof Model) {
-            return $row->getAttribute($column->getName());
+        if ($item instanceof Model) {
+            return $item->getAttribute($column->getName());
         }
 
-        return data_get($row, $column->getName());
+        return data_get($item, $column->getName());
+    }
+
+    /**
+     * Renderiza actions estáticas (header/bulk) que não dependem de um registro.
+     *
+     * @param  AbstractAction[]  $actions
+     * @return array<int, array<string, mixed>>
+     */
+    protected function renderStaticActions(array $actions): array
+    {
+        $rendered = [];
+
+        foreach ($actions as $action) {
+            $result = $action->render(null, $this->request);
+            if ($result !== null) {
+                $rendered[] = $result;
+            }
+        }
+
+        return $rendered;
+    }
+
+    /**
+     * Avalia quais actions o usuário pode executar neste registro.
+     *
+     * @return array<string, array<string, mixed>>
+     */
+    protected function evaluateActionsAuthorization(Model $model): array
+    {
+        $actions = [];
+
+        foreach ($this->getActions() as $action) {
+            $rendered = $action->render($model, $this->request);
+            if ($rendered !== null) {
+                $actions[$action->getName()] = $rendered;
+            }
+        }
+
+        return $actions;
     }
 
     /**
      * @return array<string, mixed>
      */
-    protected function paginatorMeta(LengthAwarePaginator $paginator): array
+    protected function paginatorMeta(mixed $data): array
     {
-        return [
-            'current_page' => $paginator->currentPage(),
-            'last_page' => $paginator->lastPage(),
-            'per_page' => $paginator->perPage(),
-            'total' => $paginator->total(),
-            'from' => $paginator->firstItem(),
-            'to' => $paginator->lastItem(),
-        ];
+        if ($data instanceof LengthAwarePaginator) {
+            return [
+                'current_page' => $data->currentPage(),
+                'last_page' => $data->lastPage(),
+                'per_page' => $data->perPage(),
+                'total' => $data->total(),
+                'from' => $data->firstItem(),
+                'to' => $data->lastItem(),
+            ];
+        }
+
+        return $data['meta'] ?? ['total' => $data['total'] ?? 0];
     }
 }

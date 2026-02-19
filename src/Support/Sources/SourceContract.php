@@ -8,6 +8,7 @@
 
 namespace Callcocam\LaravelRaptor\Support\Sources;
 
+use Callcocam\LaravelRaptor\Support\Table\Summarizers\Summarizer;
 use Callcocam\LaravelRaptor\Support\Table\TableQueryContext;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Request;
@@ -31,4 +32,12 @@ interface SourceContract
      * Com contexto, o total considera os mesmos filtros/busca (ex.: DatabaseSource).
      */
     public function getTotal(Request $request, ?TableQueryContext $context = null): int;
+
+    /**
+     * Calcula aggregates globais (sobre todos os registros filtrados, não só a página).
+     *
+     * @param  array<int, Summarizer>  $summarizers
+     * @return array<string, mixed>
+     */
+    public function getSummary(Request $request, ?TableQueryContext $context, array $summarizers): array;
 }

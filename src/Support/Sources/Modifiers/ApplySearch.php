@@ -23,7 +23,7 @@ class ApplySearch implements QueryModifier
 {
     public function apply(Builder $query, Request $request, TableQueryContext $context): Builder
     {
-        $search = $request->get('search');
+        $search = $request->input('search');
         if ($search === null || $search === '') {
             return $query;
         }

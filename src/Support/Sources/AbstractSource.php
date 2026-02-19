@@ -39,4 +39,15 @@ abstract class AbstractSource implements SourceContract
      * O contexto permite aplicar os mesmos filtros/busca ao count (DatabaseSource).
      */
     abstract public function getTotal(Request $request, ?TableQueryContext $context = null): int;
+
+    /**
+     * Calcula aggregates globais. Por padrão retorna vazio; DatabaseSource sobrescreve.
+     *
+     * @param  array<int, \Callcocam\LaravelRaptor\Support\Table\Summarizers\Summarizer>  $summarizers
+     * @return array<string, mixed>
+     */
+    public function getSummary(Request $request, ?TableQueryContext $context, array $summarizers): array
+    {
+        return [];
+    }
 }

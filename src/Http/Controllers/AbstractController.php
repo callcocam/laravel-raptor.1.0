@@ -8,6 +8,7 @@
 
 namespace Callcocam\LaravelRaptor\Http\Controllers;
 
+use Callcocam\LaravelRaptor\Support\Actions\Types\CallbackAction;
 use Callcocam\LaravelRaptor\Support\Form\FormBuilder;
 use Callcocam\LaravelRaptor\Support\Info\InfoBuilder;
 use Callcocam\LaravelRaptor\Support\Table\TableBuilder;
@@ -172,5 +173,101 @@ class AbstractController extends BaseController
         }
 
         return redirect()->route($this->getIndexPage());
+    }
+
+    /**
+     * Executa uma action pelo nome no model.
+     * Rota: POST {resource}/{id}/action/{actionName}
+     */
+    public function executeAction(Request $request, string $id, string $actionName): mixed
+    {
+        $model = $this->getModel()->findOrFail($id);
+        $tableBuilder = $this->table($this->getTableBuilder($request));
+
+        $action = $this->resolveAction($tableBuilder, $actionName);
+
+        if (! $action instanceof CallbackAction) {
+            abort(400, "Action [{$actionName}] is not executable.");
+        }
+
+        if (! $action->isVisible($model)) {
+            abort(403, "Action [{$actionName}] is not available for this record.");
+        }
+
+        return $this->handleActionResult($action->execute($model, $request));
+    }
+
+    /**
+     * Executa uma bulk action nos models selecionados.
+     * Rota: POST {resource}/bulk-action/{actionName}
+     */
+    public function executeBulkAction(Request $request, string $actionName): mixed
+    {
+        $ids = $request->input('ids', []);
+
+        if (empty($ids)) {
+            abort(422, 'Nenhum registro selecionado.');
+        }
+
+        $tableBuilder = $this->table($this->getTableBuilder($request));
+
+        $action = collect($tableBuilder->getBulkActions())
+            ->first(fn ($a) => $a->getName() === $actionName);
+
+        if ($action === null) {
+            abort(404, "Bulk action [{$actionName}] not found.");
+        }
+
+        if (! $action instanceof CallbackAction) {
+            abort(400, "Bulk action [{$actionName}] is not executable.");
+        }
+
+        $models = $this->getModel()->whereIn(
+            $this->getModel()->getKeyName(),
+            $ids
+        )->get();
+
+        $lastResult = null;
+        foreach ($models as $model) {
+            if ($action->isVisible($model)) {
+                $lastResult = $action->execute($model, $request);
+            }
+        }
+
+        return $this->handleActionResult($lastResult);
+    }
+
+    /**
+     * Procura uma action pelo nome em todas as coleções (row, header, bulk).
+     */
+    protected function resolveAction(TableBuilder $tableBuilder, string $actionName): ?CallbackAction
+    {
+        $allActions = array_merge(
+            $tableBuilder->getActions(),
+            $tableBuilder->getHeaderActions(),
+            $tableBuilder->getBulkActions(),
+        );
+
+        $action = collect($allActions)
+            ->first(fn ($a) => $a->getName() === $actionName);
+
+        if ($action === null) {
+            abort(404, "Action [{$actionName}] not found.");
+        }
+
+        return $action;
+    }
+
+    protected function handleActionResult(mixed $result): mixed
+    {
+        if ($result instanceof \Illuminate\Http\RedirectResponse) {
+            return $result;
+        }
+
+        if ($result instanceof \Illuminate\Http\JsonResponse) {
+            return $result;
+        }
+
+        return back();
     }
 }
