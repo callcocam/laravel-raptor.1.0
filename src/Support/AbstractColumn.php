@@ -21,6 +21,8 @@ abstract class AbstractColumn
 
     protected Closure|array $column = [];
 
+    protected Closure|string|null $component = null;
+
     public function __construct(string $name, ?string $label = null)
     {
         $this->name = $name;
@@ -33,6 +35,17 @@ abstract class AbstractColumn
         //
     }
 
+
+    public function component(Closure|string $component): static
+    {
+        $this->component = $component;
+        return $this;
+    }
+
+    public function getComponent(): ?string
+    {
+        return $this->evaluate($this->component);
+    }
     /**
      * Serialização para o payload do frontend (Vue, React, Livewire, Blade).
      */
@@ -43,6 +56,7 @@ abstract class AbstractColumn
             'name' => $this->getName(),
             'label' => $this->getLabel(),
             'type' => $this->getType(),
+            'component' => $this->getComponent(),
         ];
     }
 

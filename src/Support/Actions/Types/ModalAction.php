@@ -18,6 +18,8 @@ use Illuminate\Http\Request;
  */
 abstract class ModalAction extends CallbackAction
 {
+    protected Closure|string|null $component = 'modal-action';
+
     protected Closure|string|null $title = null;
 
     protected Closure|string|null $description = null;

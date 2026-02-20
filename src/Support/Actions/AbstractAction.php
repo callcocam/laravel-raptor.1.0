@@ -32,7 +32,9 @@ abstract class AbstractAction
     use EvaluatesClosures;
     use FactoryPattern;
 
-    protected string $variant = 'default';
+    protected Closure|string|null $variant = 'default';
+
+    protected Closure|string|null $component = 'button-action';
 
     protected Closure|string|null $color = null;
 
@@ -49,7 +51,7 @@ abstract class AbstractAction
 
     protected function setUp(): void {}
 
-    public function variant(string $variant): static
+    public function variant(Closure|string|null $variant): static
     {
         $this->variant = $variant;
 
@@ -70,9 +72,9 @@ abstract class AbstractAction
         return $this;
     }
 
-    public function getVariant(): string
+    public function getVariant(): ?string
     {
-        return $this->variant;
+        return $this->evaluate($this->variant);
     }
 
     public function getColor(): ?string

@@ -23,6 +23,8 @@ class ModalFormAction extends ModalAction
 {
     use WithColumns;
 
+    protected Closure|string|null $component = 'modal-form-action'; 
+
     protected Closure|array $columns = [];
 
     protected ?Closure $onSubmitCallback = null;

@@ -21,6 +21,12 @@ class Column extends AbstractColumn
     use BelongsToSortable;
 
     protected ?Closure $formatting = null;
+    /**
+     * The component to use for the column.
+     *
+     * @var Closure|string|null
+     */
+    protected Closure|string|null $component = 'text-table-column';
 
     public function formatting(Closure $formatting): static
     {

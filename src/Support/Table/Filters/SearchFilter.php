@@ -9,10 +9,11 @@
 namespace Callcocam\LaravelRaptor\Support\Table\Filters;
 
 use Callcocam\LaravelRaptor\Support\Table\FilterBuilder;
+use Closure;
 
 class SearchFilter extends FilterBuilder
 {
-    protected string $component = 'filter-text';
+    protected Closure|string|null $component = 'search-table-filter';
 
     protected function setUp(): void
     {

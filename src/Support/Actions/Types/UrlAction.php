@@ -19,6 +19,8 @@ use Illuminate\Http\Request;
  */
 class UrlAction extends AbstractAction
 {
+    protected Closure|string|null $component = 'url-action';
+
     protected Closure|string|null $url = null;
 
     protected ?string $routeName = null;

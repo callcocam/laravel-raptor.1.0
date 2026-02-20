@@ -23,6 +23,8 @@ class ModalTableAction extends ModalAction
 {
     use WithColumns;
 
+    protected Closure|string|null $component = 'modal-table-action';
+
     protected Closure|array $columns = [];
 
     protected ?SourceContract $dataSource = null;

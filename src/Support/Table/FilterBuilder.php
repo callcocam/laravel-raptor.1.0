@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Builder;
 
 class FilterBuilder extends AbstractColumn
 {
-    protected string $component = 'filter-text';
+    protected Closure|string|null $component = 'text-table-filter';
 
     protected ?Closure $applyCallback = null;
 

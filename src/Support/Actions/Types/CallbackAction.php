@@ -20,6 +20,8 @@ use Illuminate\Http\Request;
  */
 class CallbackAction extends AbstractAction
 {
+    protected Closure|string|null $component = 'callback-action';
+
     protected ?Closure $executeCallback = null;
 
     protected ?Closure $afterExecute = null;

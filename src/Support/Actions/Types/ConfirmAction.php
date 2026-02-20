@@ -18,6 +18,8 @@ use Illuminate\Http\Request;
  */
 class ConfirmAction extends CallbackAction
 {
+    protected Closure|string|null $component = 'confirm-action';
+
     protected Closure|string|null $title = null;
 
     protected Closure|string|null $description = null;

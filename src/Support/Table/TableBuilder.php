@@ -23,6 +23,7 @@ use Closure;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class TableBuilder
 {
@@ -175,7 +176,7 @@ class TableBuilder
         if ($this->hasSummarizers()) {
             $payload['summary'] = $this->buildSummary($source, $context, $rows);
         }
-
+Storage::put('payload.json', json_encode($payload, JSON_PRETTY_PRINT));
         return $payload;
     }
 
