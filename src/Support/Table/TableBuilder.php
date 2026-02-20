@@ -176,7 +176,8 @@ class TableBuilder
         if ($this->hasSummarizers()) {
             $payload['summary'] = $this->buildSummary($source, $context, $rows);
         }
-Storage::put('payload.json', json_encode($payload, JSON_PRETTY_PRINT));
+        Storage::put('payload.json', json_encode($payload, JSON_PRETTY_PRINT));
+
         return $payload;
     }
 

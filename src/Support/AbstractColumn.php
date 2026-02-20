@@ -35,10 +35,10 @@ abstract class AbstractColumn
         //
     }
 
-
     public function component(Closure|string $component): static
     {
         $this->component = $component;
+
         return $this;
     }
 
@@ -46,6 +46,7 @@ abstract class AbstractColumn
     {
         return $this->evaluate($this->component);
     }
+
     /**
      * Serialização para o payload do frontend (Vue, React, Livewire, Blade).
      */
