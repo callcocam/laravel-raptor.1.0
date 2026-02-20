@@ -242,14 +242,19 @@ class AbstractController extends BaseController
      */
     public function executeAction(Request $request, string $id, string $actionName): mixed
     {
-        $model = $this->getModel()->findOrFail($id);
         $tableBuilder = $this->table($this->getTableBuilder($request));
-
         $action = $this->resolveAction($tableBuilder, $actionName);
 
         if (! $action instanceof CallbackAction) {
             abort(400, "Action [{$actionName}] is not executable.");
         }
+
+        // RestoreAction e ForceDeleteAction precisam encontrar registros soft-deleted
+        $query = method_exists($action, 'requiresWithTrashed') && $action->requiresWithTrashed()
+            ? $this->getModel()->withTrashed()
+            : $this->getModel();
+
+        $model = $query->findOrFail($id);
 
         if (! $action->isVisible($model)) {
             abort(403, "Action [{$actionName}] is not available for this record.");
@@ -283,16 +288,13 @@ class AbstractController extends BaseController
             abort(400, "Bulk action [{$actionName}] is not executable.");
         }
 
-        $models = $this->getModel()->whereIn(
-            $this->getModel()->getKeyName(),
-            $ids
-        )->get();
+        $models = method_exists($action, 'requiresWithTrashed') && $action->requiresWithTrashed()
+            ? $this->getModel()->withTrashed()->whereIn($this->getModel()->getKeyName(), $ids)->get()
+            : $this->getModel()->whereIn($this->getModel()->getKeyName(), $ids)->get();
 
         $lastResult = null;
         foreach ($models as $model) {
-            if ($action->isVisible($model)) {
-                $lastResult = $action->execute($model, $request);
-            }
+            $lastResult = $action->execute($model, $request);
         }
 
         return $this->handleActionResult($lastResult);

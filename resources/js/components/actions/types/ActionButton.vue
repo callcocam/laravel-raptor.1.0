@@ -4,7 +4,7 @@
       <Button
         :variant="variant"
         size="sm"
-        class="h-8 w-8 p-0"
+        class="h-6 w-6 p-0"
         @click="handleClick"
       >
         <DynamicIcon :name="action.icon" />

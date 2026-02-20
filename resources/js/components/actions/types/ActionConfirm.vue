@@ -3,7 +3,7 @@
     <Tooltip v-if="iconOnly && action.label">
       <TooltipTrigger as-child>
         <AlertDialogTrigger as-child>
-          <Button :variant="variant" size="sm" class="h-8 w-8 p-0">
+          <Button :variant="variant" size="sm" class="h-6 w-6 p-0">
             <DynamicIcon :name="action.icon" />
           </Button>
         </AlertDialogTrigger>
@@ -13,7 +13,7 @@
       </TooltipContent>
     </Tooltip>
     <AlertDialogTrigger v-else as-child>
-      <Button :variant="variant" size="sm" class="h-8">
+      <Button :variant="variant" size="sm"  >
         <DynamicIcon :name="action.icon" />
         <span class="ml-1">{{ action.label }}</span>
       </Button>
@@ -114,25 +114,32 @@ const confirmButtonClass = computed(() => {
 })
 
 function handleConfirm() {
-  const url = props.action.executeUrl ?? props.action.url
-  if (url) {
-    const method = props.action.method ?? 'delete'
-    confirmationInput.value = ''
-    console.log(`Confirmando ação "${props.action.name}" com URL:`, url, 'e método:', method)
-    // Se houver selectedIds no record (para bulk actions), envia como POST data
-    if (props.record && Array.isArray(props.record.selectedIds) && props.record.selectedIds.length > 0) {
-      router.post(url, {
-        ids: props.record.selectedIds,
-      }, {
-        preserveScroll: true,
-        preserveState: false
-      })
-    } else {
-      router.visit(url, {
-        method,
-        preserveScroll: true,
-      })
-    }
+  const baseUrl = props.action.executeUrl ?? props.action.url
+  if (!baseUrl) return
+
+  // Manter query params atuais na URL da ação
+  const url = new URL(baseUrl, window.location.origin)
+  const searchParams = new URLSearchParams(window.location.search)
+  searchParams.forEach((value, key) => {
+    url.searchParams.append(key, value)
+  })
+
+  const method = props.action.method ?? 'post'
+  confirmationInput.value = ''
+
+  // Se houver selectedIds no record (para bulk actions), envia como POST data
+  if (props.record && Array.isArray(props.record.selectedIds) && props.record.selectedIds.length > 0) {
+    router.post(url.toString(), {
+      ids: props.record.selectedIds,
+    }, {
+      preserveScroll: true,
+      preserveState: false
+    })
+  } else {
+    router.visit(url.toString(), {
+      method,
+      preserveScroll: true,
+    })
   }
 }
 </script>

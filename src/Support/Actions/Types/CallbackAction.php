@@ -89,6 +89,15 @@ class CallbackAction extends AbstractAction
 
     protected function resolveExecuteUrl(Model $model, Request $request): string
     {
+        $routeName = $request->route()?->getName();
+        
+        if ($routeName) {
+            // Extract prefix from route name (e.g., 'products.index' -> 'products')
+            $prefix = explode('.', $routeName)[0];
+            return '/'.$prefix.'/'.$model->getKey().'/action/'.$this->getName();
+        }
+
+        // Fallback to the old method
         $currentUrl = $request->url();
         $baseUrl = preg_replace('/\/[^\/]+$/', '', $currentUrl);
 
@@ -97,6 +106,15 @@ class CallbackAction extends AbstractAction
 
     protected function resolveBulkExecuteUrl(Request $request): string
     {
+        $routeName = $request->route()?->getName();
+        
+        if ($routeName) {
+            // Extract prefix from route name (e.g., 'products.index' -> 'products')
+            $prefix = explode('.', $routeName)[0];
+            return '/'.$prefix.'/bulk-action/'.$this->getName();
+        }
+
+        // Fallback to the old method
         $currentUrl = $request->url();
         // Remove query params
         $baseUrl = preg_replace('/\?.*/', '', $currentUrl);

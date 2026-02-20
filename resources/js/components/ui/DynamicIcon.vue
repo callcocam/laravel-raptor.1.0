@@ -15,7 +15,7 @@ const props = withDefaults(
   {
     name: null,
     class: '',
-    size: 'sm',
+    size: 'xs',
   }
 )
 
