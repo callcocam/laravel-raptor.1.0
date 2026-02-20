@@ -26,6 +26,7 @@ class SelectFilter extends FilterBuilder
             } else {
                 $query->where($this->getName(), $value);
             }
+            return $query;
         });
     }
 

@@ -47,14 +47,18 @@ class FilterBuilder extends AbstractColumn
     /**
      * Aplica o filtro na query (callback customizado ou FilterStrategy).
      */
-    public function applyToQuery(Builder $query, mixed $value): Builder
+    public function applyToQuery(Builder $query, mixed $value): ?Builder
     {
         if ($value === null || $value === '') {
             return $query;
         }
 
         if ($this->applyCallback !== null) {
-            return ($this->applyCallback)($query, $value);
+            $result = $this->evaluate($this->applyCallback, [
+                'query' => $query,
+                'value' => $value,
+            ]);
+            return $result instanceof Builder ? $result : $query;
         }
 
         if ($this->strategy !== null) {
