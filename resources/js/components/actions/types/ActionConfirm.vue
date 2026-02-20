@@ -117,29 +117,38 @@ function handleConfirm() {
   const baseUrl = props.action.executeUrl ?? props.action.url
   if (!baseUrl) return
 
-  // Manter query params atuais na URL da ação
-  const url = new URL(baseUrl, window.location.origin)
-  const searchParams = new URLSearchParams(window.location.search)
-  searchParams.forEach((value, key) => {
-    url.searchParams.append(key, value)
-  })
+  try {
+    // Converter caminho relativo para URL completa
+    const fullUrl = baseUrl.startsWith('http')
+      ? baseUrl
+      : `${window.location.origin}${baseUrl}`
 
-  const method = props.action.method ?? 'post'
-  confirmationInput.value = ''
+    // Manter query params atuais na URL da ação
+    const url = new URL(fullUrl)
+    const searchParams = new URLSearchParams(window.location.search)
+    searchParams.forEach((value, key) => {
+      url.searchParams.append(key, value)
+    })
 
-  // Se houver selectedIds no record (para bulk actions), envia como POST data
-  if (props.record && Array.isArray(props.record.selectedIds) && props.record.selectedIds.length > 0) {
-    router.post(url.toString(), {
-      ids: props.record.selectedIds,
-    }, {
-      preserveScroll: true,
-      preserveState: false
-    })
-  } else {
-    router.visit(url.toString(), {
-      method,
-      preserveScroll: true,
-    })
+    const method = props.action.method ?? 'post'
+    confirmationInput.value = ''
+
+    // Se houver selectedIds no record (para bulk actions), envia como POST data
+    if (props.record && Array.isArray(props.record.selectedIds) && props.record.selectedIds.length > 0) {
+      router.post(url.toString(), {
+        ids: props.record.selectedIds,
+      }, {
+        preserveScroll: true,
+        preserveState: false
+      })
+    } else {
+      router.visit(url.toString(), {
+        method,
+        preserveScroll: true,
+      })
+    }
+  } catch (error) {
+    console.error('Error in handleConfirm:', error, baseUrl)
   }
 }
 </script>

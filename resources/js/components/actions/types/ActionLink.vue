@@ -80,14 +80,24 @@ const variant = computed(() => props.action.variant ?? 'ghost');
 function getUrlWithQueryParams(baseUrl?: string): string {
     if (!baseUrl) return '';
 
-    const url = new URL(baseUrl, window.location.origin);
-    const searchParams = new URLSearchParams(window.location.search);
-    searchParams.forEach((value, key) => {
-        if (!url.searchParams.has(key)) {
-            url.searchParams.append(key, value);
-        }
-    });
+    try {
+        // Converter caminho relativo para URL completa
+        const fullUrl = baseUrl.startsWith('http') 
+            ? baseUrl 
+            : `${window.location.origin}${baseUrl}`;
+        
+        const url = new URL(fullUrl);
+        const searchParams = new URLSearchParams(window.location.search);
+        searchParams.forEach((value, key) => {
+            if (!url.searchParams.has(key)) {
+                url.searchParams.append(key, value);
+            }
+        });
 
-    return url.toString();
+        return url.toString();
+    } catch (error) {
+        console.error('Error building URL:', error, baseUrl);
+        return baseUrl;
+    }
 }
 </script>
