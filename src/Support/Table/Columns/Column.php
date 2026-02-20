@@ -10,6 +10,7 @@ namespace Callcocam\LaravelRaptor\Support\Table\Columns;
 
 use Callcocam\LaravelRaptor\Support\AbstractColumn;
 use Callcocam\LaravelRaptor\Support\Concerns;
+use Callcocam\LaravelRaptor\Support\Table\Columns\Concerns\HasEditableColumn;
 use Closure;
 
 class Column extends AbstractColumn
@@ -18,6 +19,7 @@ class Column extends AbstractColumn
     use Concerns\Shared\BelongsToRelationship;
     use Concerns\Shared\BelongsToSearchable;
     use Concerns\Shared\BelongsToSortable;
+    use HasEditableColumn;
 
     protected ?Closure $formatting = null;
 
@@ -50,6 +52,7 @@ class Column extends AbstractColumn
         $arr = array_merge(parent::toArray(), [
             'sortable' => $this->isSortable(),
             'searchable' => $this->isSearchable(),
+            'type' => $this->getInputType()
         ]);
 
         if ($this->isRelationship()) {

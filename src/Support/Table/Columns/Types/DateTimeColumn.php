@@ -25,6 +25,12 @@ class DateTimeColumn extends Column
         return $this->getFormattedValue($formatted ?? $value, $row);
     }
 
+
+    public function getInputType(): string
+    {
+        return 'datetime';
+    }
+
     public function toArray(): array
     {
         return array_merge(parent::toArray(), [

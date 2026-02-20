@@ -74,6 +74,13 @@ class LinkColumn extends Column
         return $this->getFormattedValue($value, $row);
     }
 
+
+
+    public function getInputType(): string
+    {
+        return 'link';
+    }
+
     public function toArray(): array
     {
         return array_merge(parent::toArray(), [
@@ -81,6 +88,7 @@ class LinkColumn extends Column
             'prefix' => $this->getPrefix(),
             'suffix' => $this->getSuffix(),
             'openInNewTab' => $this->shouldOpenInNewTab(),
+            'type' => $this->getInputType()
         ]);
     }
 }

@@ -2,26 +2,27 @@
 
 /**
  * Created by Claudio Campos.
- * User: callcocam@gmail.com, contato@sigasmart.com.br
+ * User: callcocam, contato@sigasmart.com.br
  * https://www.sigasmart.com.br
  */
 
-namespace Callcocam\LaravelRaptor\Support\Table\Columns\Types\Editable;
+namespace Callcocam\LaravelRaptor\Support\Table\Columns\Concerns;
 
-use Callcocam\LaravelRaptor\Support\Table\Columns\Column;
 use Closure;
 use Illuminate\Database\Eloquent\Model;
 
-/**
- * Classe base para colunas editáveis inline
- */
-abstract class BaseEditableColumn extends Column
+trait HasEditableColumn
 {
-    protected Closure|string|null $component = 'editable-table-column';
-
     protected ?Closure $updateCallback = null;
 
     protected array|Closure|null $rules = null;
+
+    public function editable(Closure|string|null $component = 'editable-text-input')
+    {
+        $this->component($component);
+
+        return $this;
+    }
 
     /**
      * Define a callback de atualização
@@ -49,11 +50,6 @@ abstract class BaseEditableColumn extends Column
     }
 
     /**
-     * Obtém o tipo de input específico (sobrescrito pelas subclasses)
-     */
-    abstract public function getInputType(): string;
-
-    /**
      * Obtém as regras de validação
      */
     public function getValidationRules(): array
@@ -72,25 +68,12 @@ abstract class BaseEditableColumn extends Column
     {
         if ($this->updateCallback === null) {
             return null;
-        } 
+        }
 
         return $this->evaluate($this->updateCallback, [
             'model' => $model,
             'value' => $value,
             'request' => $request,
-        ]);
-    }
-
-    public function render(mixed $value, $row = null): mixed
-    {
-        return $this->getFormattedValue($value, $row);
-    }
-
-    public function toArray(): array
-    {
-        return array_merge(parent::toArray(), [
-            'inputType' => $this->getInputType(),
-            'rules' => $this->getValidationRules(),
         ]);
     }
 }

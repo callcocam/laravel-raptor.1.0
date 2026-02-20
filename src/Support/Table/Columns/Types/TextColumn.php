@@ -30,6 +30,14 @@ class TextColumn extends Column
         return $this->getFormattedValue($value, $row);
     }
 
+
+
+    public function getInputType(): string
+    {
+        return 'number';
+    }
+
+
     public function toArray(): array
     {
         return array_merge(parent::toArray(), [
@@ -38,6 +46,7 @@ class TextColumn extends Column
             'limit' => $this->getLimit(),
             'prefix' => $this->getPrefix(),
             'suffix' => $this->getSuffix(),
+            'type' => $this->getInputType()
         ]);
     }
 }

@@ -32,44 +32,41 @@ trait HandlesEditableColumns
         // Busca a coluna para validação
         $tableBuilder = $this->table($this->getTableBuilder($request));
         $column = collect($tableBuilder->getColumns())
-            ->first(fn ($col) => $col->getName() === $fieldName);
+            ->first(fn($col) => $col->getName() === $fieldName);
 
         if (! $column) {
             abort(404, "Coluna [{$fieldName}] não encontrada.");
         }
 
-        // Se é uma coluna editável, executa callback de atualização
-        if (method_exists($column, 'update') && method_exists($column, 'getValidationRules')) {
-            // Validação
-            $rules = $column->getValidationRules();
-            if (! empty($rules)) {
-                try {
-                    $request->validate([
-                        'value' => $rules,
-                    ]);
-                } catch (ValidationException $e) {
-                    return back()->withErrors($e->errors());
-                }
-            }
-
-            // Executa callback
+        // Validação
+        $rules = $column->getValidationRules();
+        if (! empty($rules)) {
             try {
-                $result = $column->update($model, $value, $request);
-
-                // Atualiza o modelo
-                $model->{$fieldName} = $value;
-                $model->save();
-
-                return $this->handleActionResult($result);
-            } catch (\Exception $e) {
-                return back()->withErrors(['value' => 'Erro ao atualizar: '.$e->getMessage()]);
+                $request->validate([
+                    'value' => $rules,
+                ]);
+            } catch (ValidationException $e) {
+                return back()->withErrors($e->errors());
             }
         }
 
-        // Fallback: atualização simples
-        $model->{$fieldName} = $value;
-        $model->save();
+        // Executa callback
+        try {
+            $result = $column->update($model, $value, $request);
+            // Atualiza o modelo
+            $data[$fieldName] = data_get($result, 'value', $value);
+            $model->update($data);
 
-        return $this->handleActionResult(null);
+            return $this->handleActionResult($result);
+        } catch (\Exception $e) {
+            return back()->withErrors(['value' => 'Erro ao atualizar: ' . $e->getMessage()]);
+        }
+
+        return $this->handleActionResult([
+            'notification' => [
+                'type' => 'error',
+                'message' => __('Não foi possivel completar a atualização!!!')
+            ]
+        ]);
     }
 }

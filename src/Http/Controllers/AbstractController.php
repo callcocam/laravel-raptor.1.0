@@ -336,7 +336,6 @@ class AbstractController extends BaseController
             $notification = data_get($result, 'notification', []);
             $type = data_get($notification, 'type', 'success');
             $message = data_get($notification, 'text') ?? data_get($notification, 'message', 'Ação executada com sucesso.');
-
             return redirect()->back()->with($type, $message);
         }
         return back();

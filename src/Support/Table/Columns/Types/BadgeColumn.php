@@ -33,7 +33,7 @@ class BadgeColumn extends Column
     public function colorMap(Closure|array $map): static
     {
         if (is_array($map)) {
-            $this->colorMap = static fn () => $map;
+            $this->colorMap = static fn() => $map;
         } else {
             $this->colorMap = $map;
         }
@@ -92,6 +92,12 @@ class BadgeColumn extends Column
         return $this->getFormattedValue($value, $row);
     }
 
+
+    public function getInputType(): string
+    {
+        return 'number';
+    }
+
     public function toArray(): array
     {
         return array_merge(parent::toArray(), [
@@ -101,6 +107,7 @@ class BadgeColumn extends Column
             'prefix' => $this->getPrefix(),
             'suffix' => $this->getSuffix(),
             'isDot' => $this->isDot(),
+            'type' => $this->getInputType()
         ]);
     }
 }

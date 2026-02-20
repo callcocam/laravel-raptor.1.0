@@ -23,6 +23,12 @@ class ImageColumn extends Column
         return $this->getFormattedValue($value, $row);
     }
 
+
+    public function getInputType(): string
+    {
+        return 'image';
+    }
+
     public function toArray(): array
     {
         return array_merge(parent::toArray(), [
@@ -30,6 +36,7 @@ class ImageColumn extends Column
             'imageHeight' => $this->getImageHeight(),
             'isRounded' => $this->isRounded(),
             'fallback' => $this->getFallback(),
+            'type' => $this->getInputType()
         ]);
     }
 }
