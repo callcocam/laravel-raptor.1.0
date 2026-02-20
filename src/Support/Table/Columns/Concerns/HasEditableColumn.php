@@ -66,7 +66,10 @@ trait HasEditableColumn
      */
     public function update(Model $model, mixed $value, mixed $request = null): mixed
     {
-        
+        if ($this->updateCallback === null) {
+            return null;
+        }
+
         return $this->evaluate($this->updateCallback, [
             'model' => $model,
             'value' => $value,

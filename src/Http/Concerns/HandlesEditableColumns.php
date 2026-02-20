@@ -52,10 +52,11 @@ trait HandlesEditableColumns
 
         // Executa callback
         try {
-            $result = $column->update($model, $value, $request); 
+            if($result = $column->update($model, $value, $request)) {
+                return $this->handleActionResult($result);
+            }
             // Atualiza o modelo
-            $data[$fieldName] = data_get($result, 'value', $value);
-            dd($data);
+            $data[$fieldName] = $value; 
             $model->update($data);
 
             return $this->handleActionResult($result);
