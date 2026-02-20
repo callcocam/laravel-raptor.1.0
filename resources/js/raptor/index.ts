@@ -26,6 +26,21 @@ ComponentRegistry.registerBulk({
 })
 
 /**
+ * Auto-registro de componentes de estrutura da Table
+ *
+ * Estes componentes são registrados automaticamente e podem ser
+ * sobrescritos pela aplicação se necessário.
+ */
+ComponentRegistry.registerBulk({
+    'table-header': defineAsyncComponent(() => import('@raptor/components/table/TableHeader.vue')),
+    'table-filters': defineAsyncComponent(() => import('@raptor/components/table/TableFilters.vue')),
+    'table-renderer': defineAsyncComponent(() => import('@raptor/components/table/TableRenderer.vue')),
+    'table-footer': defineAsyncComponent(() => import('@raptor/components/table/TableFooter.vue')),
+    'table-bulk-action-inline': defineAsyncComponent(() => import('@raptor/components/table/actions/TableBulkActionInline.vue')),
+    'data-table': defineAsyncComponent(() => import('@raptor/components/table/DataTable.vue')),
+})
+
+/**
  * Auto-registro de componentes padrão de Table
  *
  * Estes componentes são registrados automaticamente e podem ser

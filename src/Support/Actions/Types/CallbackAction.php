@@ -52,7 +52,10 @@ class CallbackAction extends AbstractAction
             return null;
         }
 
-        $result = ($this->executeCallback)($model, $request);
+        $result = $this->evaluate($this->executeCallback, [
+            'model' => $model,
+            'request' => $request,
+        ]);
 
         if ($this->afterExecute !== null) {
             return ($this->afterExecute)($model, $request, $result);
@@ -76,8 +79,10 @@ class CallbackAction extends AbstractAction
             'actionName' => $this->getName(),
         ]);
 
-        if ($model !== null && $request !== null) {
-            $data['executeUrl'] = $this->resolveExecuteUrl($model, $request);
+        if ($request !== null) {
+            $data['executeUrl'] = $model !== null
+                ? $this->resolveExecuteUrl($model, $request)
+                : $this->resolveBulkExecuteUrl($request);
         }
 
         return $data;
@@ -89,5 +94,16 @@ class CallbackAction extends AbstractAction
         $baseUrl = preg_replace('/\/[^\/]+$/', '', $currentUrl);
 
         return $baseUrl.'/'.$model->getKey().'/action/'.$this->getName();
+    }
+
+    protected function resolveBulkExecuteUrl(Request $request): string
+    {
+        $currentUrl = $request->url();
+        // Remove query params
+        $baseUrl = preg_replace('/\?.*/', '', $currentUrl);
+        // Remove trailing slash if present
+        $baseUrl = rtrim($baseUrl, '/');
+
+        return $baseUrl.'/action/'.$this->getName();
     }
 }

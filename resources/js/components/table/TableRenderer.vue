@@ -69,17 +69,6 @@ import { Button } from '@/components/ui/button'
 import ColumnRenderer from './types/ColumnRenderer.vue'
 import TableActionRenderer from './TableActionRenderer.vue'
 
-const defaultComponents = {
-  actions: 'table-action-inline',
-  filters: 'table-filter-inline',
-  headerActions: 'table-header-action-inline',
-  bulkActions: 'table-bulk-action-inline',
-  summary: 'table-summary-inline',
-  pagination: 'table-pagination-inline',
-  selectable: 'table-selectable-inline',
-  dropdownActions: 'table-dropdown-action-inline',
-}
-
 const props = withDefaults(
   defineProps<{
     columns: Array<{ name: string; label: string; sortable?: boolean; component?: string }>
@@ -89,6 +78,7 @@ const props = withDefaults(
     currentSort?: string | null
     currentSortDir?: 'asc' | 'desc'
     selectedIds?: (string | number)[]
+    /** Nomes dos componentes (vindo do backend: table.components). Ex.: { actions: 'table-action-inline', ... } */
     components?: Record<string, string>
   }>(),
   {
@@ -101,7 +91,8 @@ const props = withDefaults(
   }
 )
 
-const tableComponents = computed(() => ({ ...defaultComponents, ...props.components }))
+/** Usa apenas o que o backend enviou em table.components; sem defaults fixos no frontend. */
+const tableComponents = computed(() => props.components ?? {})
 
 const emit = defineEmits<{
   (e: 'update:selectedIds', value: (string | number)[]): void

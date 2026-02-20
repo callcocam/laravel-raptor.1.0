@@ -118,10 +118,20 @@ function handleConfirm() {
   if (url) {
     const method = props.action.method ?? 'delete'
     confirmationInput.value = ''
-    router.visit(url, {
-      method,
-      preserveScroll: true,
-    })
+    
+    // Se houver selectedIds no record (para bulk actions), envia como POST data
+    if (props.record && Array.isArray(props.record.selectedIds) && props.record.selectedIds.length > 0) {
+      router.post(url, {
+        ids: props.record.selectedIds,
+      }, {
+        preserveScroll: true,
+      })
+    } else {
+      router.visit(url, {
+        method,
+        preserveScroll: true,
+      })
+    }
   }
 }
 </script>
