@@ -24,6 +24,7 @@
           :current-sort="currentSort"
           :current-sort-dir="currentSortDir"
           v-model:selected-ids="selectedIds"
+          :components="table?.components"
           @sort="onSort"
           @row-action="onRowAction"
         />
@@ -57,6 +58,7 @@ interface TablePayload {
   meta?: { current_page: number; last_page: number; per_page: number; total: number; from?: number; to?: number }
   selectable?: boolean
   headerActions?: Array<{ name: string; label: string; url?: string | null; inertia?: boolean }>
+  components?: Record<string, string>
 }
 
 const page = usePage()

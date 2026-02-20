@@ -3,9 +3,8 @@ import { defineAsyncComponent } from 'vue'
 import type { Component } from 'vue'
 // import ActionRegistry from '../utils/ActionRegistry'
 // import FilterRegistry from '../utils/FilterRegistry'
-// import TableRegistry from '../utils/TableRegistry'
-import ComponentRegistry from '../utils/ComponentRegistry'
-import TextTableColumn from '../components/table/columns/TextTableColumn.vue'
+// import TableRegistry from '../utils/TableRegistry' 
+import ComponentRegistry from '@raptor/utils/ComponentRegistry'
 
 /**
  * Auto-registro de componentes padrão do InfoList
@@ -33,7 +32,9 @@ ComponentRegistry.registerBulk({
  * sobrescritos pela aplicação se necessário.
  */
 ComponentRegistry.registerBulk({
-    'text-table-column': TextTableColumn,
+    'text-table-column': defineAsyncComponent(() => import('~/components/table/columns/TextTableColumn.vue')),
+    'table-action-inline': defineAsyncComponent(() => import('~/components/table/actions/TableActionInline.vue')),
+    'table-action-dropdown': defineAsyncComponent(() => import('~/components/table/actions/TableActionDropdown.vue')),
     // 'table-column-text': defineAsyncComponent(() => import('~/components/table/columns/TableText.vue')),
     // 'table-column-text-editable': defineAsyncComponent(() => import('~/components/table/columns/editable/TableText.vue')),
     // 'table-column-email': defineAsyncComponent(() => import('~/components/table/columns/TableEmail.vue')),

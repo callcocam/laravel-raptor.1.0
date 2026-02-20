@@ -59,6 +59,19 @@ class TableBuilder
 
     protected string $defaultSortDirection = 'asc';
 
+    protected ?bool $dropdownActions = null;
+
+    protected array $tableComponents = [
+        'actions' => 'table-action-inline',
+        'filters' => 'table-filter-inline',
+        'headerActions' => 'table-header-action-inline',
+        'bulkActions' => 'table-bulk-action-inline',
+        'summary' => 'table-summary-inline',
+        'pagination' => 'table-pagination-inline',
+        'selectable' => 'table-selectable-inline',
+        'dropdownActions' => 'table-dropdown-action-inline',
+    ];
+
     public function __construct(protected Request $request, protected ?Model $model = null) {}
 
     /**
@@ -108,6 +121,40 @@ class TableBuilder
         return $this->selectable;
     }
 
+    public function showDropdownActions(bool $show = true): static
+    {
+        $this->dropdownActions = $show;
+
+        return $this;
+    }
+
+    public function hasDropdownActions(): bool
+    {
+        return $this->dropdownActions !== null && $this->dropdownActions === true;
+    }
+
+
+    public function tableComponents(array $components): static
+    {
+        foreach ($components as $name => $component) {
+            $this->tableComponent($name, $component);
+        }
+
+        return $this;
+    }
+
+    public function tableComponent(string $name, string $component): static
+    {
+        $this->tableComponents[$name] = $component;
+
+        return $this;
+    }
+
+    public function getTableComponents(): array
+    {
+        return $this->tableComponents;
+    }
+
     public function source(SourceContract $source): static
     {
         $this->source = $source;
@@ -144,14 +191,15 @@ class TableBuilder
         }
 
         $rows = array_map(
-            fn ($item) => $this->buildRow($item, $resolvedColumns),
+            fn($item) => $this->buildRow($item, $resolvedColumns),
             $items
         );
 
         $payload = [
-            'columns' => array_map(fn (AbstractColumn $col) => $col->toArray(), $resolvedColumns),
+            'columns' => array_map(fn(AbstractColumn $col) => $col->toArray(), $resolvedColumns),
             'data' => $rows,
             'meta' => $meta,
+            'components' => $this->getTableComponents(),
         ];
 
         if ($this->selectable) {
@@ -160,7 +208,7 @@ class TableBuilder
 
         if ($this->hasActions()) {
             $payload['actions'] = array_map(
-                fn (AbstractAction $action) => $action->toArray(),
+                fn(AbstractAction $action) => $action->toArray(),
                 $this->getActions()
             );
         }
@@ -232,7 +280,7 @@ class TableBuilder
 
         $pageSummary = [];
         foreach ($summarizers as $summarizer) {
-            $key = $summarizer->getFunction().'_'.$summarizer->getColumn();
+            $key = $summarizer->getFunction() . '_' . $summarizer->getColumn();
             $pageSummary[$key] = [
                 'value' => $summarizer->computeFromRows($rows),
                 'label' => $summarizer->getLabel(),

@@ -13,7 +13,7 @@
             <Button
               v-if="col.sortable"
               variant="ghost"
-              class="-ml-3 h-8 px-3"
+              class="-ml-3 h-8 px-3 w-full justify-between"
               @click="emit('sort', col.name)"
             >
               {{ col.label }}
@@ -42,22 +42,11 @@
             <ColumnRenderer :record="row" :column="col" />
           </TableCell>
           <TableCell v-if="hasRowActions">
-            <DropdownMenu v-if="rowActionsList(row).length">
-              <DropdownMenuTrigger as-child>
-                <Button variant="ghost" class="h-8 w-8 p-0">
-                  <MoreHorizontal class="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem
-                  v-for="act in rowActionsList(row)"
-                  :key="act.name"
-                  @click="emit('rowAction', { row, action: act })"
-                >
-                  {{ act.label }}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <TableActionRenderer
+              :component="tableComponents.actions"
+              :record="row"
+              @action="(a) => emit('rowAction', { row, action: a })"
+            />
           </TableCell>
         </TableRow>
       </TableBody>
@@ -67,7 +56,6 @@
 
 <script lang="ts" setup>
 import { computed } from 'vue'
-import { MoreHorizontal } from 'lucide-vue-next'
 import {
   Table,
   TableBody,
@@ -77,14 +65,20 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+import { Button } from '@/components/ui/button' 
 import ColumnRenderer from './types/ColumnRenderer.vue'
+import TableActionRenderer from './TableActionRenderer.vue'
+
+const defaultComponents = {
+  actions: 'table-action-inline',
+  filters: 'table-filter-inline',
+  headerActions: 'table-header-action-inline',
+  bulkActions: 'table-bulk-action-inline',
+  summary: 'table-summary-inline',
+  pagination: 'table-pagination-inline',
+  selectable: 'table-selectable-inline',
+  dropdownActions: 'table-dropdown-action-inline',
+}
 
 const props = withDefaults(
   defineProps<{
@@ -95,6 +89,7 @@ const props = withDefaults(
     currentSort?: string | null
     currentSortDir?: 'asc' | 'desc'
     selectedIds?: (string | number)[]
+    components?: Record<string, string>
   }>(),
   {
     selectable: false,
@@ -102,8 +97,13 @@ const props = withDefaults(
     currentSort: null,
     currentSortDir: 'asc',
     selectedIds: () => [],
+    components: () => ({}),
   }
 )
+
+const tableComponents = computed(() => ({ ...defaultComponents, ...props.components }))
+
+console.log(tableComponents.value)
 
 const emit = defineEmits<{
   (e: 'update:selectedIds', value: (string | number)[]): void
