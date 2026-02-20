@@ -1,103 +1,89 @@
 <template>
   <div class="rounded-md border">
-    <div class="relative w-full overflow-auto">
-      <table class="w-full caption-bottom text-sm">
-        <thead class="[&_tr]:border-b">
-          <tr class="border-b transition-colors">
-            <th
-              v-if="selectable"
-              class="h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 w-10"
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead v-if="selectable" class="w-10">
+            <Checkbox
+              :model-value="isAllSelected"
+              @update:model-value="toggleSelectAll"
+            />
+          </TableHead>
+          <TableHead v-for="col in columns" :key="col.name">
+            <Button
+              v-if="col.sortable"
+              variant="ghost"
+              class="-ml-3 h-8 px-3"
+              @click="emit('sort', col.name)"
             >
-              <button
-                type="button"
-                role="checkbox"
-                :aria-checked="isAllSelected"
-                class="size-4 shrink-0 rounded border border-input translate-y-0.5"
-                @click="toggleSelectAll"
-              />
-            </th>
-            <th
-              v-for="col in columns"
-              :key="col.name"
-              class="h-10 px-2 text-left align-middle font-medium whitespace-nowrap"
-            >
-              <button
-                v-if="col.sortable"
-                type="button"
-                class="inline-flex items-center gap-2 -ml-3 h-8 px-3 text-sm font-medium hover:bg-accent rounded-md"
-                @click="emit('sort', col.name)"
-              >
-                {{ col.label }}
-                <span v-if="currentSort === col.name" class="text-muted-foreground">
-                  {{ currentSortDir === 'desc' ? '↓' : '↑' }}
-                </span>
-              </button>
-              <span v-else>{{ col.label }}</span>
-            </th>
-            <th v-if="hasRowActions" class="h-10 px-2 w-10" />
-          </tr>
-        </thead>
-        <tbody class="[&_tr:last-child]:border-0">
-            <tr
-            v-for="row in data"
-            :key="rowId(row)"
-            class="border-b transition-colors hover:bg-muted/50"
-          >
-            <td
-              v-if="selectable"
-              class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
-            >
-              <button
-                type="button"
-                role="checkbox"
-                :aria-checked="selectedIds.includes(rowId(row))"
-                class="size-4 shrink-0 rounded border border-input translate-y-0.5"
-                @click="toggleRow(rowId(row))"
-              />
-            </td>
-            <td
-              v-for="col in columns"
-              :key="col.name"
-              class="p-2 align-middle whitespace-nowrap"
-            >
-              <ColumnRenderer :record="row" :column="col" />
-            </td>
-            <td v-if="hasRowActions" class="p-2 align-middle whitespace-nowrap">
-              <div v-if="rowActionsList(row).length" class="relative">
-                <button
-                  type="button"
-                  class="flex h-8 w-8 items-center justify-center rounded-md hover:bg-accent"
-                  aria-haspopup="true"
-                  :aria-expanded="openRowMenu === rowId(row)"
-                  @click="openRowMenu = openRowMenu === rowId(row) ? null : rowId(row)"
+              {{ col.label }}
+              <span v-if="currentSort === col.name" class="ml-2 text-muted-foreground">
+                {{ currentSortDir === 'desc' ? '↓' : '↑' }}
+              </span>
+            </Button>
+            <span v-else>{{ col.label }}</span>
+          </TableHead>
+          <TableHead v-if="hasRowActions" class="w-10" />
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        <TableRow
+          v-for="row in data"
+          :key="rowId(row)"
+          :data-state="selectedIds.includes(rowId(row)) ? 'selected' : undefined"
+        >
+          <TableCell v-if="selectable">
+            <Checkbox
+              :model-value="selectedIds.includes(rowId(row))"
+              @update:model-value="toggleRow(rowId(row))"
+            />
+          </TableCell>
+          <TableCell v-for="col in columns" :key="col.name">
+            <ColumnRenderer :record="row" :column="col" />
+          </TableCell>
+          <TableCell v-if="hasRowActions">
+            <DropdownMenu v-if="rowActionsList(row).length">
+              <DropdownMenuTrigger as-child>
+                <Button variant="ghost" class="h-8 w-8 p-0">
+                  <MoreHorizontal class="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  v-for="act in rowActionsList(row)"
+                  :key="act.name"
+                  @click="emit('rowAction', { row, action: act })"
                 >
-                  &#8230;
-                </button>
-                <div
-                  v-if="openRowMenu === rowId(row)"
-                  class="absolute right-0 top-full z-10 mt-1 min-w-[120px] rounded-md border bg-background py-1 shadow-lg"
-                >
-                  <a
-                    v-for="act in rowActionsList(row)"
-                    :key="act.name"
-                    :href="act.url || '#'"
-                    class="block px-3 py-1.5 text-sm hover:bg-accent"
-                    @click.prevent="emit('rowAction', { row, action: act })"
-                  >
-                    {{ act.label }}
-                  </a>
-                </div>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+                  {{ act.label }}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </TableCell>
+        </TableRow>
+      </TableBody>
+    </Table>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, computed } from 'vue'
+import { computed } from 'vue'
+import { MoreHorizontal } from 'lucide-vue-next'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import ColumnRenderer from './types/ColumnRenderer.vue'
 
 const props = withDefaults(
@@ -124,8 +110,6 @@ const emit = defineEmits<{
   (e: 'sort', column: string): void
   (e: 'rowAction', payload: { row: Record<string, unknown>; action: { name: string; label: string; url?: string } }): void
 }>()
-
-const openRowMenu = ref<string | number | null>(null)
 
 function rowId(row: { _selectId?: string; id?: string }): string | number {
   return row._selectId ?? row.id ?? ''

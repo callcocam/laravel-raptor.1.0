@@ -1,37 +1,45 @@
 <template>
   <div class="flex items-center justify-between gap-2 flex-wrap">
     <div class="flex flex-1 items-center gap-2 flex-wrap">
-      <input
-        :value="search"
+      <Input
+        :model-value="search"
         type="text"
-        class="h-8 w-[150px] lg:w-[250px] rounded-md border bg-transparent px-3 py-1 text-sm placeholder:text-muted-foreground"
+        class="h-8 w-[150px] lg:w-[250px]"
         :placeholder="searchPlaceholder"
-        @input="emit('update:search', ($event.target as HTMLInputElement).value)"
+        @update:model-value="emit('update:search', $event)"
       />
       <template v-if="filters?.length">
-        <button
+        <Button
           v-for="f in filters"
           :key="f.name"
-          type="button"
-          class="inline-flex items-center gap-1.5 rounded-md border border-dashed px-3 py-1.5 h-8 text-sm font-medium"
+          variant="outline"
+          size="sm"
+          class="h-8 border-dashed"
         >
-          + {{ f.label }}
-        </button>
+          <PlusCircle class="mr-2 h-4 w-4" />
+          {{ f.label }}
+        </Button>
       </template>
-      <button
+      <Button
         v-if="hasActiveFilters || search"
-        type="button"
-        class="inline-flex items-center gap-2 px-2 lg:px-3 h-8 text-sm font-medium"
+        variant="ghost"
+        size="sm"
+        class="h-8 px-2 lg:px-3"
         @click="reset"
       >
         Reset
-      </button>
+        <XCircle class="ml-2 h-4 w-4" />
+      </Button>
     </div>
     <slot name="view" />
   </div>
 </template>
 
 <script lang="ts" setup>
+import { PlusCircle, XCircle } from 'lucide-vue-next'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+
 defineProps<{
   search?: string
   searchPlaceholder?: string

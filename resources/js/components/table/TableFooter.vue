@@ -5,61 +5,82 @@
     </div>
     <div class="flex items-center gap-4 lg:gap-8">
       <div v-if="meta" class="flex items-center gap-2">
-        <label class="text-sm font-medium">Rows per page</label>
-        <select
-          :value="meta.per_page"
-          class="h-8 w-[70px] rounded-md border border-input bg-transparent px-3 py-2 text-sm"
-          @change="emit('update:perPage', Number(($event.target as HTMLSelectElement).value))"
+        <Label class="text-sm font-medium">Rows per page</Label>
+        <Select
+          :model-value="String(meta.per_page)"
+          @update:model-value="emit('update:perPage', Number($event))"
         >
-          <option v-for="n in perPageOptions" :key="n" :value="n">{{ n }}</option>
-        </select>
+          <SelectTrigger class="h-8 w-[70px]">
+            <SelectValue :placeholder="String(meta.per_page)" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem v-for="n in perPageOptions" :key="n" :value="String(n)">
+              {{ n }}
+            </SelectItem>
+          </SelectContent>
+        </Select>
       </div>
       <div v-if="meta" class="flex w-[100px] items-center justify-center text-sm font-medium">
         Page {{ meta.current_page }} of {{ meta.last_page }}
       </div>
       <div v-if="meta && meta.last_page > 1" class="flex items-center gap-2">
-        <button
-          type="button"
-          class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground disabled:opacity-50"
+        <Button
+          variant="outline"
+          size="icon"
+          class="h-8 w-8"
           :disabled="meta.current_page <= 1"
           aria-label="Go to first page"
           @click="emit('page', 1)"
         >
-          &laquo;
-        </button>
-        <button
-          type="button"
-          class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground disabled:opacity-50"
+          <ChevronsLeft class="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          class="h-8 w-8"
           :disabled="meta.current_page <= 1"
           aria-label="Go to previous page"
           @click="emit('page', meta.current_page - 1)"
         >
-          &lsaquo;
-        </button>
-        <button
-          type="button"
-          class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground disabled:opacity-50"
+          <ChevronLeft class="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          class="h-8 w-8"
           :disabled="meta.current_page >= meta.last_page"
           aria-label="Go to next page"
           @click="emit('page', meta.current_page + 1)"
         >
-          &rsaquo;
-        </button>
-        <button
-          type="button"
-          class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground disabled:opacity-50"
+          <ChevronRight class="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          class="h-8 w-8"
           :disabled="meta.current_page >= meta.last_page"
           aria-label="Go to last page"
           @click="emit('page', meta.last_page)"
         >
-          &raquo;
-        </button>
+          <ChevronsRight class="h-4 w-4" />
+        </Button>
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-vue-next'
+import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+
 const perPageOptions = [10, 25, 50, 100]
 
 defineProps<{

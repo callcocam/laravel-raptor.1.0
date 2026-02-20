@@ -5,20 +5,20 @@
       <p v-if="subtitle" class="text-muted-foreground text-sm">{{ subtitle }}</p>
     </div>
     <div v-if="headerActions && headerActions.length" class="flex items-center gap-2">
-      <a
+      <Button
         v-for="action in headerActions"
         :key="action.name"
-        :href="action.url || '#'"
-        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium h-9 px-4 py-2 border bg-primary text-primary-foreground hover:bg-primary/90"
-        @click.prevent="handleAction(action)"
+        @click="handleAction(action)"
       >
         {{ action.label }}
-      </a>
+      </Button>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
+import { Button } from '@/components/ui/button'
+
 const props = defineProps<{
   title?: string
   subtitle?: string
