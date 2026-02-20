@@ -1,63 +1,13 @@
 import { ref, computed, watch, type Ref } from 'vue'
 import { router, usePage } from '@inertiajs/vue3'
-
-export interface UseDataTableOptions {
-  /**
-   * Tempo de debounce para a busca em ms
-   */
-  searchDebounce?: number
-  /**
-   * Se deve preservar o scroll ao navegar
-   */
-  preserveScroll?: boolean
-  /**
-   * Se deve preservar o estado ao navegar
-   */
-  preserveState?: boolean
-}
-
-export interface TableMeta {
-  current_page: number
-  last_page: number
-  per_page: number
-  total: number
-  from?: number
-  to?: number
-}
-
-export interface TableAction {
-  name: string
-  label: string
-  url?: string | null
-  inertia?: boolean
-  method?: string
-}
-
-export interface RowActionPayload {
-  row: Record<string, unknown>
-  action: TableAction
-}
-
-export interface DataTableState {
-  search: Ref<string>
-  currentSort: Ref<string | null>
-  currentSortDir: Ref<'asc' | 'desc'>
-  selectedIds: Ref<(string | number)[]>
-  isLoading: Ref<boolean>
-}
-
-export interface DataTableActions {
-  onSort: (column: string) => void
-  onPage: (page: number) => void
-  onPerPage: (perPage: number) => void
-  onSearch: (value: string) => void
-  onFiltersReset: () => void
-  onHeaderAction: (action: TableAction) => void
-  onRowAction: (payload: RowActionPayload) => void
-  onBulkAction: (action: TableAction) => void
-  clearSelection: () => void
-  selectAll: (ids: (string | number)[]) => void
-}
+import type {
+  UseDataTableOptions,
+  TableMeta,
+  TableAction,
+  RowActionPayload,
+  DataTableState,
+  DataTableActions,
+} from '@raptor/types'
 
 /**
  * Composable para gerenciar estado e ações do DataTable
@@ -174,13 +124,25 @@ export function useDataTable(options: UseDataTableOptions = {}) {
   }
 
   /**
+   * Aplica um filtro individual
+   */
+  function onFilterApply(filterName: string, value: any) {
+    navigate({ [filterName]: value, page: 1 })
+  }
+
+  /**
    * Reseta todos os filtros
    */
   function onFiltersReset() {
     search.value = ''
     currentSort.value = null
     currentSortDir.value = 'asc'
-    navigate({ search: null, sort: null, sort_dir: null, page: 1 })
+    // Navigate to clean URL, removing all query params
+    router.visit(window.location.pathname, {
+      preserveScroll,
+      preserveState: false,
+      onFinish: () => { isLoading.value = false },
+    })
   }
 
   /**
@@ -263,6 +225,7 @@ console.log('Executando ação em massa:', action.name, action, 'IDs:', selected
     onPage,
     onPerPage,
     onSearch,
+    onFilterApply,
     onFiltersReset,
     onHeaderAction,
     onRowAction,

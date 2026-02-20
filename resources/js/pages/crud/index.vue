@@ -25,18 +25,8 @@ import { Head, usePage } from '@inertiajs/vue3'
 import ResourseLayout from '@raptor/layouts/ResourseLayout.vue'
 import DataTable from '@raptor/components/table/DataTable.vue'
 import type { BreadcrumbItem } from '@/types'
+import type { TablePayload } from '@raptor/types'
 import { dashboard } from '@/routes'
-
-interface TablePayload {
-  columns?: Array<{ name: string; label: string; sortable?: boolean; component?: string }>
-  data?: Array<Record<string, unknown> & { _selectId?: string; id?: string; actions?: Record<string, { name: string; label: string; url?: string }> }>
-  meta?: { current_page: number; last_page: number; per_page: number; total: number; from?: number; to?: number }
-  selectable?: boolean
-  headerActions?: Array<{ name: string; label: string; url?: string | null; inertia?: boolean }>
-  bulkActions?: Array<{ name: string; label: string; url?: string | null; inertia?: boolean }>
-  filters?: Array<{ name: string; label: string; component?: string }>
-  components?: Record<string, string>
-}
 
 const page = usePage()
 const table = computed(() => (page.props.table as TablePayload | undefined) ?? null)

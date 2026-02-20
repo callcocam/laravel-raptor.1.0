@@ -124,11 +124,9 @@ ComponentRegistry.registerBulk({
  * sobrescritos pela aplicação se necessário.
  */ 
 
-// FilterRegistry.registerBulk({
-//     'filter-text': defineAsyncComponent(() => import('@raptor/components/filters/types/FilterText.vue')),
-// })
-
-// FilterRegistry.markAsInitialized()
+ComponentRegistry.registerBulk({
+    'filter-select': defineAsyncComponent(() => import('@raptor/components/table/filters/FilterSelect.vue')),
+})
 
 /**
  * Opções do RaptorPlugin

@@ -21,7 +21,11 @@ class SelectFilter extends FilterBuilder
     protected function setUp(): void
     {
         $this->queryUsing(function ($query, $value) {
-            $query->where($this->getName(), $value);
+            if (is_string($value) && str_contains($value, ',')) {
+                $query->whereIn($this->getName(), explode(',', $value));
+            } else {
+                $query->where($this->getName(), $value);
+            }
         });
     }
 

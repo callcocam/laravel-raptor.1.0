@@ -15,6 +15,7 @@
         :filters="filters"
         :has-active-filters="hasActiveFilters"
         @reset="handleFiltersReset"
+        @apply-filter="onFilterApply"
       />
       <component
         v-if="bulkActions && bulkActions.length > 0 && selectedIds.length > 0"
@@ -54,36 +55,8 @@
 <script lang="ts" setup>
 import { computed, ref, watch, type Component } from 'vue'
 import ComponentRegistry from '@raptor/utils/ComponentRegistry'
-import { useDataTable, type TableAction, type RowActionPayload } from '@raptor/composables/useDataTable'
-
-export interface TableColumn {
-  name: string
-  label: string
-  sortable?: boolean
-  component?: string
-}
-
-export interface TableMeta {
-  current_page: number
-  last_page: number
-  per_page: number
-  total: number
-  from?: number
-  to?: number
-}
-
-export interface TableComponents {
-  header?: string
-  filters?: string
-  renderer?: string
-  footer?: string
-  bulkActions?: string
-  actions?: string
-  dropdownActions?: string
-  pagination?: string
-  selectable?: string
-  summary?: string
-}
+import { useDataTable } from '@raptor/composables/useDataTable'
+import type { TableAction, RowActionPayload, TableColumn, TableMeta, TableComponents, Filter } from '@raptor/types'
 
 const props = withDefaults(defineProps<{
   title?: string
@@ -95,7 +68,7 @@ const props = withDefaults(defineProps<{
   rowActions?: boolean
   headerActions?: TableAction[]
   bulkActions?: TableAction[]
-  filters?: Array<{ name: string; label: string; component?: string }>
+  filters?: Filter[]
   components?: TableComponents
   /**
    * Se true, o DataTable gerencia navegação/estado internamente
@@ -136,6 +109,7 @@ const {
   onPage,
   onPerPage,
   onSearch,
+  onFilterApply,
   onFiltersReset,
   onHeaderAction,
   onRowAction,

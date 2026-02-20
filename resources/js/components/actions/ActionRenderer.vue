@@ -26,18 +26,7 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 import ComponentRegistry from '@raptor/utils/ComponentRegistry'
-
-export interface TableAction {
-  name: string
-  label: string
-  component?: string
-  actionType?: string
-  url?: string
-  confirm?: boolean
-  to?: string
-  target?: string
-  [key: string]: unknown
-}
+import type { TableAction } from '@raptor/types'
 
 const props = defineProps<{
   action: TableAction
