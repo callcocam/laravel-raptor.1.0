@@ -48,6 +48,10 @@ ComponentRegistry.registerBulk({
  */
 ComponentRegistry.registerBulk({
     'text-table-column': defineAsyncComponent(() => import('@raptor/components/table/columns/TextTableColumn.vue')),
+    'image-table-column': defineAsyncComponent(() => import('@raptor/components/table/columns/ImageTableColumn.vue')),
+    'datetime-table-column': defineAsyncComponent(() => import('@raptor/components/table/columns/DateTimeTableColumn.vue')),
+    'link-table-column': defineAsyncComponent(() => import('@raptor/components/table/columns/LinkTableColumn.vue')),
+    'badge-table-column': defineAsyncComponent(() => import('@raptor/components/table/columns/BadgeTableColumn.vue')),
     'table-action-inline': defineAsyncComponent(() => import('@raptor/components/table/actions/TableActionInline.vue')),
     'table-action-dropdown': defineAsyncComponent(() => import('@raptor/components/table/actions/TableActionDropdown.vue')),
     // 'table-column-text': defineAsyncComponent(() => import('@raptor/components/table/columns/TableText.vue')),

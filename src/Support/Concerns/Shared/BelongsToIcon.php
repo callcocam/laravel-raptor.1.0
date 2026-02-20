@@ -12,7 +12,7 @@ use Closure;
 
 trait BelongsToIcon
 {
-    protected Closure|string|null $icon = 'Settings';
+    protected Closure|string|null $icon = null;
 
     /**
      * Define o ícone da ação
