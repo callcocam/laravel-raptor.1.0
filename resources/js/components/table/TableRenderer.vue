@@ -103,8 +103,6 @@ const props = withDefaults(
 
 const tableComponents = computed(() => ({ ...defaultComponents, ...props.components }))
 
-console.log(tableComponents.value)
-
 const emit = defineEmits<{
   (e: 'update:selectedIds', value: (string | number)[]): void
   (e: 'sort', column: string): void

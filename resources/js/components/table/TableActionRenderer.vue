@@ -10,23 +10,21 @@
     :actions="actionsList"
     :record="record"
     @action="onAction"
-  /> 
+  />  
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import ComponentRegistry from '@raptor/utils/ComponentRegistry'
 
 const props = defineProps<{
   component: string
   record: Record<string, unknown> & { actions?: Record<string, { name: string; label: string; url?: string }> }
 }>()
-
+console.log('TableActionRenderer props:', ComponentRegistry) // Debug: Verificar props recebidas
 const emit = defineEmits<{
   (e: 'action', action: { name: string; label: string; url?: string }): void
 }>()
-
-const open = ref(false)
 
 const resolvedComponent = computed(() =>
   ComponentRegistry.get(props.component) ?? null
@@ -38,7 +36,6 @@ const actionsList = computed(() => {
 })
 
 function onAction(act: { name: string; label: string; url?: string }) {
-  open.value = false
   emit('action', act)
 }
 </script>

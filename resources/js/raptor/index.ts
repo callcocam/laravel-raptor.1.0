@@ -32,23 +32,23 @@ ComponentRegistry.registerBulk({
  * sobrescritos pela aplicação se necessário.
  */
 ComponentRegistry.registerBulk({
-    'text-table-column': defineAsyncComponent(() => import('~/components/table/columns/TextTableColumn.vue')),
-    'table-action-inline': defineAsyncComponent(() => import('~/components/table/actions/TableActionInline.vue')),
-    'table-action-dropdown': defineAsyncComponent(() => import('~/components/table/actions/TableActionDropdown.vue')),
-    // 'table-column-text': defineAsyncComponent(() => import('~/components/table/columns/TableText.vue')),
-    // 'table-column-text-editable': defineAsyncComponent(() => import('~/components/table/columns/editable/TableText.vue')),
-    // 'table-column-email': defineAsyncComponent(() => import('~/components/table/columns/TableEmail.vue')),
-    // 'table-column-email-editable': defineAsyncComponent(() => import('~/components/table/columns/editable/TableEmail.vue')),
-    // 'table-column-date': defineAsyncComponent(() => import('~/components/table/columns/TableDate.vue')),
-    // 'table-column-date-editable': defineAsyncComponent(() => import('~/components/table/columns/editable/TableDate.vue')),
-    // 'table-column-phone': defineAsyncComponent(() => import('~/components/table/columns/TablePhone.vue')),
-    // 'table-column-phone-editable': defineAsyncComponent(() => import('~/components/table/columns/editable/TablePhone.vue')),
-    // 'table-column-status': defineAsyncComponent(() => import('~/components/table/columns/TableStatus.vue')),
-    // 'table-column-status-editable': defineAsyncComponent(() => import('~/components/table/columns/editable/TableStatus.vue')),
-    // 'table-column-boolean': defineAsyncComponent(() => import('~/components/table/columns/TableBoolean.vue')),
-    // 'table-column-boolean-editable': defineAsyncComponent(() => import('~/components/table/columns/editable/TableBoolean.vue')),
-    // 'table-column-image': defineAsyncComponent(() => import('~/components/table/columns/TableImage.vue')),
-    // 'table-column-image-editable': defineAsyncComponent(() => import('~/components/table/columns/editable/TableImage.vue')),
+    'text-table-column': defineAsyncComponent(() => import('@raptor/components/table/columns/TextTableColumn.vue')),
+    'table-action-inline': defineAsyncComponent(() => import('@raptor/components/table/actions/TableActionInline.vue')),
+    'table-action-dropdown': defineAsyncComponent(() => import('@raptor/components/table/actions/TableActionDropdown.vue')),
+    // 'table-column-text': defineAsyncComponent(() => import('@raptor/components/table/columns/TableText.vue')),
+    // 'table-column-text-editable': defineAsyncComponent(() => import('@raptor/components/table/columns/editable/TableText.vue')),
+    // 'table-column-email': defineAsyncComponent(() => import('@raptor/components/table/columns/TableEmail.vue')),
+    // 'table-column-email-editable': defineAsyncComponent(() => import('@raptor/components/table/columns/editable/TableEmail.vue')),
+    // 'table-column-date': defineAsyncComponent(() => import('@raptor/components/table/columns/TableDate.vue')),
+    // 'table-column-date-editable': defineAsyncComponent(() => import('@raptor/components/table/columns/editable/TableDate.vue')),
+    // 'table-column-phone': defineAsyncComponent(() => import('@raptor/components/table/columns/TablePhone.vue')),
+    // 'table-column-phone-editable': defineAsyncComponent(() => import('@raptor/components/table/columns/editable/TablePhone.vue')),
+    // 'table-column-status': defineAsyncComponent(() => import('@raptor/components/table/columns/TableStatus.vue')),
+    // 'table-column-status-editable': defineAsyncComponent(() => import('@raptor/components/table/columns/editable/TableStatus.vue')),
+    // 'table-column-boolean': defineAsyncComponent(() => import('@raptor/components/table/columns/TableBoolean.vue')),
+    // 'table-column-boolean-editable': defineAsyncComponent(() => import('@raptor/components/table/columns/editable/TableBoolean.vue')),
+    // 'table-column-image': defineAsyncComponent(() => import('@raptor/components/table/columns/TableImage.vue')),
+    // 'table-column-image-editable': defineAsyncComponent(() => import('@raptor/components/table/columns/editable/TableImage.vue')),
 })
 
 /**
@@ -59,31 +59,7 @@ ComponentRegistry.registerBulk({
 
 // New Field-based components (recommended)
 ComponentRegistry.registerBulk({
-    // 'form-field-text': defineAsyncComponent(() => import('~/components/form/fields/FormFieldText.vue')),
-    // 'form-field-textarea': defineAsyncComponent(() => import('~/components/form/fields/FormFieldTextarea.vue')),
-    // 'form-field-select': defineAsyncComponent(() => import('~/components/form/fields/FormFieldSelect.vue')),
-    // 'form-field-checkbox': defineAsyncComponent(() => import('~/components/form/fields/FormFieldCheckbox.vue')),
-    // 'form-field-checkbox-group': defineAsyncComponent(() => import('~/components/form/fields/FormFieldCheckboxGroup.vue')),
-    // 'form-field-date': defineAsyncComponent(() => import('~/components/form/fields/FormFieldDate.vue')),
-    // 'form-field-number': defineAsyncComponent(() => import('~/components/form/fields/FormFieldNumber.vue')),
-    // 'form-field-email': defineAsyncComponent(() => import('~/components/form/fields/FormFieldEmail.vue')),
-    // 'form-field-password': defineAsyncComponent(() => import('~/components/form/fields/FormFieldPassword.vue')),
-    // 'form-field-hidden': defineAsyncComponent(() => import('~/components/form/fields/FormFieldHidden.vue')),
-    // 'form-field-file-upload': defineAsyncComponent(() => import('~/components/form/fields/FormFieldFileUpload.vue')),
-    // 'form-field-file-upload-async': defineAsyncComponent(() => import('~/components/form/fields/FormFieldFileUploadAsync.vue')),
-    // 'form-field-combobox': defineAsyncComponent(() => import('~/components/form/fields/FormFieldCombobox.vue')),
-    // 'form-field-cascading': defineAsyncComponent(() => import('~/components/form/fields/FormFieldCascading.vue')),
-    // 'form-field-repeater': defineAsyncComponent(() => import('~/components/form/fields/FormFieldRepeater.vue')),
-    // 'form-field-repeater-compact': defineAsyncComponent(() => import('~/components/form/fields/repeater/RepeaterItemCompact.vue')),
-    // 'form-field-money': defineAsyncComponent(() => import('~/components/form/fields/FormFieldMoney.vue')),
-    // 'form-field-search-select': defineAsyncComponent(() => import('~/components/form/fields/FormFieldSearchSelect.vue')),
-    // 'form-field-search-combobox': defineAsyncComponent(() => import('~/components/form/fields/FormFieldSearchCombobox.vue')),
-    // 'form-field-busca-cep': defineAsyncComponent(() => import('~/components/form/fields/FormFieldBuscaCep.vue')),
-    // 'form-field-cloudflare-dns': defineAsyncComponent(() => import('~/components/form/fields/FormFieldCloudflareDns.vue')),
-    // 'form-field-cnpj': defineAsyncComponent(() => import('~/components/form/fields/FormFieldCnpj.vue')),
-    // 'form-field-mask': defineAsyncComponent(() => import('~/components/form/fields/FormFieldMask.vue')),
-    // 'form-field-relationship': defineAsyncComponent(() => import('~/components/form/fields/FormFieldRelationship.vue')),
-    // 'form-field-section': defineAsyncComponent(() => import('~/components/form/fields/FormFieldSection.vue')),
+    // 'form-field-text': defineAsyncComponent(() => import('@raptor/components/form/fields/FormFieldText.vue')), 
 })
 
 /**
@@ -93,8 +69,8 @@ ComponentRegistry.registerBulk({
  * sobrescritos pela aplicação se necessário.
  */
 // BreadcrumbRegistry.registerBulk({
-//     'breadcrumb-default': defineAsyncComponent(() => import('~/components/breadcrumbs/DefaultBreadcrumb.vue')),
-//     'breadcrumb-page-header': defineAsyncComponent(() => import('~/components/breadcrumbs/PageHeaderBreadcrumb.vue')),
+//     'breadcrumb-default': defineAsyncComponent(() => import('@raptor/components/breadcrumbs/DefaultBreadcrumb.vue')),
+//     'breadcrumb-page-header': defineAsyncComponent(() => import('@raptor/components/breadcrumbs/PageHeaderBreadcrumb.vue')),
 // })
 
 // BreadcrumbRegistry.markAsInitialized()
@@ -107,7 +83,7 @@ ComponentRegistry.registerBulk({
  */ 
 
 // TableRegistry.registerBulk({
-//     'table-default': defineAsyncComponent(() => import('~/components/table/DefaultTable.vue')),
+//     'table-default': defineAsyncComponent(() => import('@raptor/components/table/DefaultTable.vue')),
 // })
 
 // TableRegistry.markAsInitialized()
@@ -119,11 +95,12 @@ ComponentRegistry.registerBulk({
  * sobrescritos pela aplicação se necessário.
  */ 
 
-// ActionRegistry.registerBulk({
-//     'action-button': defineAsyncComponent(() => import('~/components/actions/types/ActionButton.vue')),
-// })
-
-// ActionRegistry.markAsInitialized()
+ComponentRegistry.registerBulk({
+    'action-button': defineAsyncComponent(() => import('@raptor/components/actions/types/ActionButton.vue')),
+    'action-link': defineAsyncComponent(() => import('@raptor/components/actions/types/ActionLink.vue')),
+    'action-confirm': defineAsyncComponent(() => import('@raptor/components/actions/types/ActionConfirm.vue')),
+    'action-link-confirm': defineAsyncComponent(() => import('@raptor/components/actions/types/ActionLinkConfirm.vue')),
+})
 
 /**
  * Auto-registro de componentes padrão de Filters
@@ -133,7 +110,7 @@ ComponentRegistry.registerBulk({
  */ 
 
 // FilterRegistry.registerBulk({
-//     'filter-text': defineAsyncComponent(() => import('~/components/filters/types/FilterText.vue')),
+//     'filter-text': defineAsyncComponent(() => import('@raptor/components/filters/types/FilterText.vue')),
 // })
 
 // FilterRegistry.markAsInitialized()
@@ -189,7 +166,7 @@ const install = (app: App, options: RaptorPluginOptions = {}): void => {
     // Registra componentes globais do Raptor
     app.component(
         'NotificationDropdown',
-        defineAsyncComponent(() => import('~/components/NotificationDropdown.vue'))
+        defineAsyncComponent(() => import('@raptor/components/NotificationDropdown.vue'))
     )
 
     // Registra formatadores personalizados

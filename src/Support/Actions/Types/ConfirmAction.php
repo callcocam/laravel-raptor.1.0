@@ -32,6 +32,31 @@ class ConfirmAction extends CallbackAction
 
     protected ?string $confirmIcon = null;
 
+    protected bool $requireTextConfirmation = false;
+
+    protected Closure|string|null $confirmationText = null;
+
+    protected ?string $confirmationPlaceholder = null;
+
+    protected bool $useRandomWord = false;
+
+    /**
+     * Lista padrão de palavras seguras para confirmação.
+     * Palavras curtas, simples e sem conotação negativa.
+     */
+    protected array $confirmationWords = [
+        'CONFIRMAR',
+        'EXCLUIR',
+        'DELETAR',
+        'REMOVER',
+        'APAGAR',
+        'SIM',
+        'CONTINUAR',
+        'PROSSEGUIR',
+        'AUTORIZAR',
+        'ACEITAR',
+    ];
+
     public function title(Closure|string $title): static
     {
         $this->title = $title;
@@ -74,6 +99,77 @@ class ConfirmAction extends CallbackAction
         return $this;
     }
 
+    /**
+     * Habilita confirmação por texto digitado.
+     * O usuário precisará digitar o texto especificado para confirmar a ação.
+     */
+    public function requireTextConfirmation(Closure|string|null $text = null, ?string $placeholder = null): static
+    {
+        $this->requireTextConfirmation = true;
+        $this->confirmationText = $text;
+        $this->confirmationPlaceholder = $placeholder;
+
+        return $this;
+    }
+
+    /**
+     * Define o texto que deve ser digitado para confirmar.
+     */
+    public function confirmationText(Closure|string $text): static
+    {
+        $this->confirmationText = $text;
+
+        return $this;
+    }
+
+    /**
+     * Define o placeholder do input de confirmação.
+     */
+    public function confirmationPlaceholder(string $placeholder): static
+    {
+        $this->confirmationPlaceholder = $placeholder;
+
+        return $this;
+    }
+
+    /**
+     * Habilita confirmação usando uma palavra aleatória da lista.
+     * Opcionalmente pode passar uma lista customizada de palavras.
+     */
+    public function requireRandomTextConfirmation(?array $words = null, ?string $placeholder = null): static
+    {
+        $this->requireTextConfirmation = true;
+        $this->useRandomWord = true;
+
+        if ($words !== null) {
+            $this->confirmationWords = $words;
+        }
+
+        if ($placeholder !== null) {
+            $this->confirmationPlaceholder = $placeholder;
+        }
+
+        return $this;
+    }
+
+    /**
+     * Define a lista de palavras para sorteio.
+     */
+    public function confirmationWords(array $words): static
+    {
+        $this->confirmationWords = $words;
+
+        return $this;
+    }
+
+    /**
+     * Sorteia uma palavra aleatória da lista.
+     */
+    protected function getRandomWord(): string
+    {
+        return $this->confirmationWords[array_rand($this->confirmationWords)];
+    }
+
     public function render(?Model $model = null, ?Request $request = null): ?array
     {
         $base = parent::render($model, $request);
@@ -81,13 +177,25 @@ class ConfirmAction extends CallbackAction
             return null;
         }
 
-        $title = ($this->title instanceof Closure && $model !== null)
-            ? ($this->title)($model)
-            : (is_string($this->title) ? $this->title : null);
+        $title = $this->evaluate($this->title, [
+            'model' => $model,
+            'request' => $request,
+        ]);
 
-        $description = ($this->description instanceof Closure && $model !== null)
-            ? ($this->description)($model)
-            : (is_string($this->description) ? $this->description : null);
+        $description = $this->evaluate($this->description, [
+            'model' => $model,
+            'request' => $request,
+        ]);
+
+        $confirmationText = null;
+
+        if ($this->useRandomWord) {
+            $confirmationText = $this->getRandomWord();
+        } elseif ($this->confirmationText instanceof Closure && $model !== null) {
+            $confirmationText = ($this->confirmationText)($model);
+        } elseif (is_string($this->confirmationText)) {
+            $confirmationText = $this->confirmationText;
+        }
 
         return array_merge($base, [
             'title' => $title,
@@ -96,6 +204,9 @@ class ConfirmAction extends CallbackAction
             'cancelText' => $this->cancelText,
             'confirmVariant' => $this->confirmVariant,
             'confirmIcon' => $this->confirmIcon,
+            'requireTextConfirmation' => $this->requireTextConfirmation,
+            'confirmationText' => $confirmationText,
+            'confirmationPlaceholder' => $this->confirmationPlaceholder ?? 'Digite para confirmar',
         ]);
     }
 }
