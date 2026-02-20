@@ -122,7 +122,7 @@ trait BelongsToDateTime
             } elseif ($value instanceof DateTime) {
                 $date = $value;
             } else {
-                return (string) $value;
+                return $value->format($this->getFormat());
             }
 
             if ($this->timezone !== null) {
