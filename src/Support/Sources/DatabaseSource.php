@@ -28,6 +28,7 @@ class DatabaseSource extends AbstractSource
     {
         parent::__construct($model);
     }
+
     /**
      * Pipeline de modifiers padrão. Sobrescreva para adicionar/remover etapas.
      *

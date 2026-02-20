@@ -47,7 +47,7 @@ class TableBuilder
 
     protected ?SourceContract $source = null;
 
-    /** @var Closure|null Recebe (Builder $query) para customizar a query (ex.: eager load). */
+    /** @var Closure|null Recebe (Builder) para customizar a query (ex.: eager load). */
     protected ?Closure $queryCallback = null;
 
     protected bool $selectable = false;
