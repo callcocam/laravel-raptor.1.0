@@ -90,7 +90,7 @@ class AbstractController extends BaseController
             return;
         }
 
-        $key = $page->getRouteName().'.'.$ability;
+        $key = $page->getRouteName() . '.' . $ability;
         if (! Gate::has($key)) {
             return;
         }
@@ -280,7 +280,7 @@ class AbstractController extends BaseController
         $tableBuilder = $this->table($this->getTableBuilder($request));
 
         $action = collect($tableBuilder->getBulkActions())
-            ->first(fn ($a) => $a->getName() === $actionName);
+            ->first(fn($a) => $a->getName() === $actionName);
 
         if ($action === null) {
             abort(404, "Bulk action [{$actionName}] not found.");
@@ -314,7 +314,7 @@ class AbstractController extends BaseController
         );
 
         $action = collect($allActions)
-            ->first(fn ($a) => $a->getName() === $actionName);
+            ->first(fn($a) => $a->getName() === $actionName);
 
         if ($action === null) {
             abort(404, "Action [{$actionName}] not found.");
@@ -332,7 +332,13 @@ class AbstractController extends BaseController
         if ($result instanceof \Illuminate\Http\JsonResponse) {
             return $result;
         }
+        if (is_array($result)) {
+            $notification = data_get($result, 'notification', []);
+            $type = data_get($notification, 'type', 'success');
+            $message = data_get($notification, 'text') ?? data_get($notification, 'message', 'Ação executada com sucesso.');
 
+            return redirect()->back()->with($type, $message);
+        }
         return back();
     }
 }

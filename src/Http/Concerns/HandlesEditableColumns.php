@@ -32,7 +32,7 @@ trait HandlesEditableColumns
         // Busca a coluna para validação
         $tableBuilder = $this->table($this->getTableBuilder($request));
         $column = collect($tableBuilder->getColumns())
-            ->first(fn($col) => $col->getName() === $fieldName);
+            ->first(fn ($col) => $col->getName() === $fieldName);
 
         if (! $column) {
             abort(404, "Coluna [{$fieldName}] não encontrada.");
@@ -48,10 +48,7 @@ trait HandlesEditableColumns
                         'value' => $rules,
                     ]);
                 } catch (ValidationException $e) {
-                    return redirect()->back()->with([
-                        'message' => 'Validação falhou',
-                        'errors' => $e->errors(),
-                    ], 422);
+                    return back()->withErrors($e->errors());
                 }
             }
 
@@ -63,14 +60,9 @@ trait HandlesEditableColumns
                 $model->{$fieldName} = $value;
                 $model->save();
 
-                return redirect()->back()->with([
-                    'message' => 'Campo atualizado com sucesso',
-                    'data' => $model,
-                ]);
+                return $this->handleActionResult($result);
             } catch (\Exception $e) {
-                return redirect()->back()->with([
-                    'message' => 'Erro ao atualizar: ' . $e->getMessage(),
-                ], 500);
+                return back()->withErrors(['value' => 'Erro ao atualizar: '.$e->getMessage()]);
             }
         }
 
@@ -78,9 +70,6 @@ trait HandlesEditableColumns
         $model->{$fieldName} = $value;
         $model->save();
 
-        return redirect()->back()->with([
-            'message' => 'Campo atualizado com sucesso',
-            'data' => $model,
-        ]);
+        return $this->handleActionResult(null);
     }
 }
