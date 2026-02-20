@@ -8,6 +8,7 @@
 
 namespace Callcocam\LaravelRaptor\Http\Controllers;
 
+use Callcocam\LaravelRaptor\Http\Concerns\HandlesEditableColumns;
 use Callcocam\LaravelRaptor\Support\Actions\Types\CallbackAction;
 use Callcocam\LaravelRaptor\Support\Form\FormBuilder;
 use Callcocam\LaravelRaptor\Support\Info\InfoBuilder;
@@ -24,6 +25,7 @@ use Inertia\Inertia;
 class AbstractController extends BaseController
 {
     use AuthorizesRequests, ValidatesRequests;
+    use HandlesEditableColumns;
 
     /**
      * The model to be used in the controller.

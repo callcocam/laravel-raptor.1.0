@@ -14,10 +14,10 @@ use Closure;
 
 class Column extends AbstractColumn
 {
-    use  Concerns\Shared\BelongsToRelationship;
-    use  Concerns\Shared\BelongsToSearchable;
-    use  Concerns\Shared\BelongsToSortable;
     use Concerns\Shared\BelongsToOptions;
+    use Concerns\Shared\BelongsToRelationship;
+    use Concerns\Shared\BelongsToSearchable;
+    use Concerns\Shared\BelongsToSortable;
 
     protected ?Closure $formatting = null;
 

@@ -32,10 +32,10 @@ class BulkForceDeleteAction extends ConfirmAction
             ->confirmVariant('destructive')
             ->confirmIcon('Trash2')
             ->visible(fn ($model) => in_array(request()->input('trashed'), ['with', 'only']))
-            ->executeUsing(function ($model = null, $request) {
+            ->executeUsing(function ($model, $request) {
                 $ids = $request->input('ids', []);
                 $model->newQuery()
-                
+
                     ->withTrashed()
                     ->whereIn($model->getKeyName(), $ids)
                     ->forceDelete();

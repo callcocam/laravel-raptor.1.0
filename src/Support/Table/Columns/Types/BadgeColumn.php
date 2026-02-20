@@ -8,11 +8,11 @@
 
 namespace Callcocam\LaravelRaptor\Support\Table\Columns\Types;
 
-use Closure;
 use Callcocam\LaravelRaptor\Support\Concerns\Shared\BelongsToColor;
 use Callcocam\LaravelRaptor\Support\Concerns\Shared\BelongsToIcon;
 use Callcocam\LaravelRaptor\Support\Concerns\Shared\BelongsToPrefixSuffix;
 use Callcocam\LaravelRaptor\Support\Table\Columns\Column;
+use Closure;
 
 class BadgeColumn extends Column
 {
@@ -33,7 +33,7 @@ class BadgeColumn extends Column
     public function colorMap(Closure|array $map): static
     {
         if (is_array($map)) {
-            $this->colorMap = static fn() => $map;
+            $this->colorMap = static fn () => $map;
         } else {
             $this->colorMap = $map;
         }

@@ -31,7 +31,7 @@ class DeleteAction extends ConfirmAction
             ->confirmVariant('destructive')
             ->confirmIcon('Trash2')
             ->policy('delete')
-            ->visible(fn($model) => !$model->trashed()) // Não mostrar se só estiver vendo itens excluídos
-            ->executeUsing(fn($model) => $model->delete());
+            ->visible(fn ($model) => ! $model->trashed()) // Não mostrar se só estiver vendo itens excluídos
+            ->executeUsing(fn ($model) => $model->delete());
     }
 }

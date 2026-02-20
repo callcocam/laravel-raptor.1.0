@@ -58,6 +58,7 @@ class FilterBuilder extends AbstractColumn
                 'query' => $query,
                 'value' => $value,
             ]);
+
             return $result instanceof Builder ? $result : $query;
         }
 

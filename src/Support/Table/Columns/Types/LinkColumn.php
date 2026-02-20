@@ -8,10 +8,10 @@
 
 namespace Callcocam\LaravelRaptor\Support\Table\Columns\Types;
 
-use Closure;
 use Callcocam\LaravelRaptor\Support\Concerns\Shared\BelongsToIcon;
 use Callcocam\LaravelRaptor\Support\Concerns\Shared\BelongsToPrefixSuffix;
 use Callcocam\LaravelRaptor\Support\Table\Columns\Column;
+use Closure;
 
 class LinkColumn extends Column
 {

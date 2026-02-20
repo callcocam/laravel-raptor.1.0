@@ -8,9 +8,9 @@
 
 namespace Callcocam\LaravelRaptor\Support\Table\Columns\Types;
 
-use Closure;
 use Callcocam\LaravelRaptor\Support\Concerns\Shared\BelongsToImage;
 use Callcocam\LaravelRaptor\Support\Table\Columns\Column;
+use Closure;
 
 class ImageColumn extends Column
 {

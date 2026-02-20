@@ -28,7 +28,7 @@ class BulkDeleteAction extends ConfirmAction
             ->description('Deseja excluir os registros selecionados?')
             ->confirmText('Sim, excluir')
             ->confirmVariant('destructive')
-            ->visible(fn () => !in_array(request()->input('trashed'), ['with', 'only']))
+            ->visible(fn () => ! in_array(request()->input('trashed'), ['with', 'only']))
             ->executeUsing(function ($model, $request) {
                 $ids = $request->input('ids', []);
                 $model->newQuery()

@@ -21,7 +21,7 @@ class BulkRestoreAction extends ConfirmAction
     protected bool $requiresWithTrashed = true;
 
     protected function setUp(): void
-    { 
+    {
         $this
             ->label('Restaurar selecionados')
             ->icon('ArchiveRestore')
@@ -33,7 +33,7 @@ class BulkRestoreAction extends ConfirmAction
             ->confirmIcon('ArchiveRestore')
             ->visible(fn ($model) => in_array(request()->input('trashed'), ['with', 'only']))
             ->executeUsing(function ($model, $request) {
-                $ids = $request->input('ids', []); 
+                $ids = $request->input('ids', []);
                 $model->newQuery()
                     ->withTrashed()
                     ->whereIn($model->getKeyName(), $ids)

@@ -50,7 +50,7 @@ class CallbackAction extends AbstractAction
     {
         if ($this->executeCallback === null) {
             return null;
-        } 
+        }
         $result = $this->evaluate($this->executeCallback, [
             'model' => $model,
             'request' => $request,
@@ -90,10 +90,11 @@ class CallbackAction extends AbstractAction
     protected function resolveExecuteUrl(Model $model, Request $request): string
     {
         $routeName = $request->route()?->getName();
-        
+
         if ($routeName) {
             // Extract prefix from route name (e.g., 'products.index' -> 'products')
             $prefix = explode('.', $routeName)[0];
+
             return '/'.$prefix.'/'.$model->getKey().'/action/'.$this->getName();
         }
 
@@ -107,10 +108,11 @@ class CallbackAction extends AbstractAction
     protected function resolveBulkExecuteUrl(Request $request): string
     {
         $routeName = $request->route()?->getName();
-        
+
         if ($routeName) {
             // Extract prefix from route name (e.g., 'products.index' -> 'products')
             $prefix = explode('.', $routeName)[0];
+
             return '/'.$prefix.'/bulk-action/'.$this->getName();
         }
 
