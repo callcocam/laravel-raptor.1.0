@@ -12,6 +12,7 @@
         :row-actions="true"
         :header-actions="table?.headerActions"
         :bulk-actions="table?.bulkActions"
+        :filters="table?.filters"
         :components="table?.components"
       />
     </div>
@@ -33,6 +34,7 @@ interface TablePayload {
   selectable?: boolean
   headerActions?: Array<{ name: string; label: string; url?: string | null; inertia?: boolean }>
   bulkActions?: Array<{ name: string; label: string; url?: string | null; inertia?: boolean }>
+  filters?: Array<{ name: string; label: string; component?: string }>
   components?: Record<string, string>
 }
 

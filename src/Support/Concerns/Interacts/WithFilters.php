@@ -12,6 +12,8 @@ use Closure;
 
 trait WithFilters
 {
+    protected Closure|array $filters = [];
+
     public function filters(Closure|array $filters): static
     {
         $this->filters = $filters;

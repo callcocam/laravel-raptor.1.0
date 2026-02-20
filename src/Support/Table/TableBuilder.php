@@ -62,14 +62,16 @@ class TableBuilder
     protected ?bool $dropdownActions = null;
 
     protected array $tableComponents = [
-        'actions' => 'table-action-inline',
-        'filters' => 'table-filter-inline',
-        'headerActions' => 'table-header-action-inline',
+        'header' => 'table-header',
+        'filters' => 'table-filters',
+        'renderer' => 'table-renderer',
+        'footer' => 'table-footer',
         'bulkActions' => 'table-bulk-action-inline',
-        'summary' => 'table-summary-inline',
-        'pagination' => 'table-pagination-inline',
-        'selectable' => 'table-selectable-inline',
-        'dropdownActions' => 'table-dropdown-action-inline',
+        'actions' => 'table-action-inline',
+        'dropdownActions' => 'table-action-dropdown',
+        'pagination' => null,
+        'selectable' => null,
+        'summary' => null,
     ];
 
     public function __construct(protected Request $request, protected ?Model $model = null) {}
@@ -203,6 +205,10 @@ class TableBuilder
 
         if ($this->selectable) {
             $payload['selectable'] = true;
+        }
+
+        if (count($this->getResolvedFilters()) > 0) {
+            $payload['filters'] = array_map(fn ($filter) => $filter->toArray(), $this->getResolvedFilters());
         }
 
         if ($this->hasActions()) {

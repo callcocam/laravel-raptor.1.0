@@ -10,12 +10,13 @@ namespace Callcocam\LaravelRaptor\Support\Table\Filters;
 
 use Callcocam\LaravelRaptor\Support\Concerns\Shared\BelongsToOptions;
 use Callcocam\LaravelRaptor\Support\Table\FilterBuilder;
+use Closure;
 
 class SelectFilter extends FilterBuilder
 {
     use BelongsToOptions;
 
-    protected string $component = 'filter-select';
+    protected Closure|string|null $component = 'filter-select';
 
     protected function setUp(): void
     {

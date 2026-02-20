@@ -50,8 +50,7 @@ class CallbackAction extends AbstractAction
     {
         if ($this->executeCallback === null) {
             return null;
-        }
-
+        } 
         $result = $this->evaluate($this->executeCallback, [
             'model' => $model,
             'request' => $request,
@@ -104,6 +103,6 @@ class CallbackAction extends AbstractAction
         // Remove trailing slash if present
         $baseUrl = rtrim($baseUrl, '/');
 
-        return $baseUrl.'/action/'.$this->getName();
+        return $baseUrl.'/bulk-action/'.$this->getName();
     }
 }

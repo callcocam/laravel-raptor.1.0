@@ -12,6 +12,7 @@
         :is="resolvedComponents.filters"
         v-model:search="search"
         search-placeholder="Filtrar..."
+        :filters="filters"
         :has-active-filters="hasActiveFilters"
         @reset="handleFiltersReset"
       />
@@ -94,6 +95,7 @@ const props = withDefaults(defineProps<{
   rowActions?: boolean
   headerActions?: TableAction[]
   bulkActions?: TableAction[]
+  filters?: Array<{ name: string; label: string; component?: string }>
   components?: TableComponents
   /**
    * Se true, o DataTable gerencia navegação/estado internamente
@@ -144,7 +146,7 @@ const {
 const hasActiveFilters = computed(() => {
   return !!search.value || !!currentSort.value
 })
-
+console.log('DataTable Props:', props)
 // Handlers que decidem entre modo gerenciado e manual
 function handleSort(column: string) {
   if (props.managed) {

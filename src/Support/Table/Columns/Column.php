@@ -9,16 +9,15 @@
 namespace Callcocam\LaravelRaptor\Support\Table\Columns;
 
 use Callcocam\LaravelRaptor\Support\AbstractColumn;
-use Callcocam\LaravelRaptor\Support\Concerns\Shared\BelongsToRelationship;
-use Callcocam\LaravelRaptor\Support\Concerns\Shared\BelongsToSearchable;
-use Callcocam\LaravelRaptor\Support\Concerns\Shared\BelongsToSortable;
+use Callcocam\LaravelRaptor\Support\Concerns;
 use Closure;
 
 class Column extends AbstractColumn
 {
-    use BelongsToRelationship;
-    use BelongsToSearchable;
-    use BelongsToSortable;
+    use  Concerns\Shared\BelongsToRelationship;
+    use  Concerns\Shared\BelongsToSearchable;
+    use  Concerns\Shared\BelongsToSortable;
+    use Concerns\Shared\BelongsToOptions;
 
     protected ?Closure $formatting = null;
 
