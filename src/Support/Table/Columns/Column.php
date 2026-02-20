@@ -19,6 +19,7 @@ class Column extends AbstractColumn
     use Concerns\Shared\BelongsToRelationship;
     use Concerns\Shared\BelongsToSearchable;
     use Concerns\Shared\BelongsToSortable;
+    use Concerns\Shared\BelongsToIcon;
     use HasEditableColumn;
 
     protected ?Closure $formatting = null;
@@ -52,7 +53,7 @@ class Column extends AbstractColumn
         $arr = array_merge(parent::toArray(), [
             'sortable' => $this->isSortable(),
             'searchable' => $this->isSearchable(),
-            'type' => $this->getInputType()
+            'inputType' => $this->getInputType()
         ]);
 
         if ($this->isRelationship()) {

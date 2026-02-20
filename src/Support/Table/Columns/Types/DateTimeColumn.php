@@ -28,7 +28,7 @@ class DateTimeColumn extends Column
 
     public function getInputType(): string
     {
-        return 'datetime';
+        return 'datetime-local';
     }
 
     public function toArray(): array

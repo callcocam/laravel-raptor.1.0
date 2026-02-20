@@ -8,8 +8,7 @@
 
 namespace Callcocam\LaravelRaptor\Support\Table\Columns\Types;
 
-use Callcocam\LaravelRaptor\Support\Concerns\Shared\BelongsToBadge;
-use Callcocam\LaravelRaptor\Support\Concerns\Shared\BelongsToIcon;
+use Callcocam\LaravelRaptor\Support\Concerns\Shared\BelongsToBadge; 
 use Callcocam\LaravelRaptor\Support\Concerns\Shared\BelongsToLimit;
 use Callcocam\LaravelRaptor\Support\Concerns\Shared\BelongsToPrefixSuffix;
 use Callcocam\LaravelRaptor\Support\Table\Columns\Column;
@@ -17,7 +16,6 @@ use Callcocam\LaravelRaptor\Support\Table\Columns\Column;
 class TextColumn extends Column
 {
     use BelongsToBadge;
-    use BelongsToIcon;
     use BelongsToLimit;
     use BelongsToPrefixSuffix;
 

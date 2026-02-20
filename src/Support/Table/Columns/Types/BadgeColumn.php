@@ -107,7 +107,7 @@ class BadgeColumn extends Column
             'prefix' => $this->getPrefix(),
             'suffix' => $this->getSuffix(),
             'isDot' => $this->isDot(),
-            'type' => $this->getInputType()
+            'inputType' => $this->getInputType()
         ]);
     }
 }
