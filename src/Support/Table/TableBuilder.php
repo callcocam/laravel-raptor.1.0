@@ -133,7 +133,6 @@ class TableBuilder
         return $this->dropdownActions !== null && $this->dropdownActions === true;
     }
 
-
     public function tableComponents(array $components): static
     {
         foreach ($components as $name => $component) {
@@ -191,12 +190,12 @@ class TableBuilder
         }
 
         $rows = array_map(
-            fn($item) => $this->buildRow($item, $resolvedColumns),
+            fn ($item) => $this->buildRow($item, $resolvedColumns),
             $items
         );
 
         $payload = [
-            'columns' => array_map(fn(AbstractColumn $col) => $col->toArray(), $resolvedColumns),
+            'columns' => array_map(fn (AbstractColumn $col) => $col->toArray(), $resolvedColumns),
             'data' => $rows,
             'meta' => $meta,
             'components' => $this->getTableComponents(),
@@ -208,7 +207,7 @@ class TableBuilder
 
         if ($this->hasActions()) {
             $payload['actions'] = array_map(
-                fn(AbstractAction $action) => $action->toArray(),
+                fn (AbstractAction $action) => $action->toArray(),
                 $this->getActions()
             );
         }
@@ -280,7 +279,7 @@ class TableBuilder
 
         $pageSummary = [];
         foreach ($summarizers as $summarizer) {
-            $key = $summarizer->getFunction() . '_' . $summarizer->getColumn();
+            $key = $summarizer->getFunction().'_'.$summarizer->getColumn();
             $pageSummary[$key] = [
                 'value' => $summarizer->computeFromRows($rows),
                 'label' => $summarizer->getLabel(),
