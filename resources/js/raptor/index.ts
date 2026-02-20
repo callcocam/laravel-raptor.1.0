@@ -126,6 +126,7 @@ ComponentRegistry.registerBulk({
 
 ComponentRegistry.registerBulk({
     'filter-select': defineAsyncComponent(() => import('@raptor/components/table/filters/FilterSelect.vue')),
+    'filter-trashed': defineAsyncComponent(() => import('@raptor/components/table/filters/FilterTrashed.vue')),
 })
 
 /**

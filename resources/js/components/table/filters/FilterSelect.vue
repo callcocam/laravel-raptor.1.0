@@ -1,80 +1,66 @@
 <template>
-    <div class="flex flex-col p-1" style="max-height: 360px">
+    <div class="flex flex-col gap-2 p-2" style="max-height: 360px">
         <!-- Search Input -->
-        <div class="mb-2">
-            <input
-                v-model="searchQuery"
-                type="text"
-                placeholder="Buscar opções..."
-                class="w-full rounded-md border border-input bg-background px-2 py-1 text-sm placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
-            />
-        </div>
+        <Input v-model="searchQuery" placeholder="Buscar opções..." class="h-8 text-sm" />
 
-        <!-- Options List with Scroll (flex-1 to fill remaining space) -->
+        <!-- Options List with Scroll -->
         <div class="min-h-0 flex-1 overflow-y-auto rounded-md border">
             <template v-if="filteredOptions.length > 0">
-                <label
+                <div
                     v-for="option in filteredOptions"
                     :key="option.value"
-                    class="flex cursor-pointer items-center gap-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-800"
+                    class="flex cursor-pointer items-center gap-2 px-2 py-1.5 hover:bg-accent"
+                    @click="toggleOption(option.value)"
                 >
-                    <input
-                        type="checkbox"
+                    <Checkbox
+                        :id="`opt-${option.value}`"
                         :checked="isSelected(option.value)"
-                        @change="toggleOption(option.value)"
-                        class="h-4 w-4 shrink-0 cursor-pointer rounded border-gray-300"
+                        @update:checked="toggleOption(option.value)"
+                        @click.stop
                     />
-                    <span class="text-sm">{{ option.label }}</span>
-                </label>
+                    <Label :for="`opt-${option.value}`" class="cursor-pointer text-sm font-normal">
+                        {{ option.label }}
+                    </Label>
+                </div>
             </template>
-            <div v-else class="px-2 py-4 text-center text-sm text-gray-500">
+            <div v-else class="px-2 py-4 text-center text-sm text-muted-foreground">
                 Nenhuma opção encontrada
             </div>
         </div>
 
-        <!-- Selected tags (only when items selected) -->
-        <div v-if="selectedValues.length > 0" class="mt-2 flex flex-col gap-1">
-            <div class="flex flex-wrap items-center gap-1">
-                <span
-                    v-for="val in selectedValues"
-                    :key="val"
-                    class="inline-flex items-center gap-1 rounded bg-blue-50 px-2 py-0.5 text-xs text-blue-700"
-                >
-                    {{ getOptionLabel(val) }}
-                    <button
-                        type="button"
-                        @click="toggleOption(val)"
-                        class="shrink-0 hover:text-blue-900"
-                    >
-                        ✕
-                    </button>
-                </span>
-            </div>
+        <!-- Selected tags -->
+        <div v-if="selectedValues.length > 0" class="flex flex-wrap gap-1">
+            <Badge
+                v-for="val in selectedValues"
+                :key="val"
+                variant="secondary"
+                class="cursor-pointer gap-1"
+                @click="toggleOption(val)"
+            >
+                {{ getOptionLabel(val) }}
+                <X class="h-3 w-3" />
+            </Badge>
+        </div>
 
-            <!-- Action Buttons (always visible, pinned to bottom) -->
-            <div class="mt-2 flex gap-2 border-t pt-2">
-                <button
-                    type="button"
-                    @click="clearAll"
-                    class="flex-1 rounded border border-gray-200 py-1.5 text-xs text-gray-600 hover:bg-gray-100"
-                >
-                    Limpar
-                </button>
-                <button
-                    type="button"
-                    @click="applyFilter"
-                    class="flex-1 rounded bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700"
-                >
-                    Aplicar
-                </button>
-            </div>
+        <!-- Action Buttons -->
+        <div class="flex gap-2 border-t pt-2">
+            <Button type="button" variant="outline" size="sm" class="flex-1" @click="clearAll">
+                Limpar
+            </Button>
+            <Button type="button" size="sm" class="flex-1" @click="applyFilter"> Aplicar </Button>
         </div>
     </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, computed } from 'vue';
-import type { Filter } from '@raptor/types';
+import { ref, computed } from 'vue'
+import { X } from 'lucide-vue-next'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Label } from '@/components/ui/label'
+import { Badge } from '@/components/ui/badge'
+import type { Filter } from '@raptor/types'
 
 const props = defineProps<{
     filter: Filter;
