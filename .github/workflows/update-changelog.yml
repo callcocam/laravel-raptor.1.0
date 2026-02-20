@@ -1,8 +1,14 @@
 name: "Update Changelog"
 
 on:
-  release:
-    types: [released]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g. 1.0.0)'
+        required: false
+      release_notes:
+        description: 'Release notes'
+        required: false
 
 permissions:
   contents: write
@@ -21,8 +27,8 @@ jobs:
       - name: Update Changelog
         uses: stefanzweifel/changelog-updater-action@v1
         with:
-          latest-version: ${{ github.event.release.name }}
-          release-notes: ${{ github.event.release.body }}
+          latest-version: ${{ github.event.inputs.version || github.event.release.name }}
+          release-notes: ${{ github.event.inputs.release_notes || github.event.release.body }}
 
       - name: Commit updated CHANGELOG
         uses: stefanzweifel/git-auto-commit-action@v5

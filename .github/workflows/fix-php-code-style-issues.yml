@@ -1,9 +1,7 @@
 name: Fix PHP code style issues
 
 on:
-  push:
-    paths:
-      - '**.php'
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -16,8 +14,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref }}
 
       - name: Fix PHP code style issues
         uses: aglipanci/laravel-pint-action@2.4

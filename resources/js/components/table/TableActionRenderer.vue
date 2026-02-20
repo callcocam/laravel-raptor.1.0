@@ -20,8 +20,7 @@ import ComponentRegistry from '@raptor/utils/ComponentRegistry'
 const props = defineProps<{
   component: string
   record: Record<string, unknown> & { actions?: Record<string, { name: string; label: string; url?: string }> }
-}>()
-console.log('TableActionRenderer props:', ComponentRegistry) // Debug: Verificar props recebidas
+}>() 
 const emit = defineEmits<{
   (e: 'action', action: { name: string; label: string; url?: string }): void
 }>()
