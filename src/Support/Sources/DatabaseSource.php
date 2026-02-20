@@ -24,6 +24,10 @@ use Illuminate\Http\Request;
  */
 class DatabaseSource extends AbstractSource
 {
+    public function __construct(?\Illuminate\Database\Eloquent\Model $model = null, protected ?\Closure $queryCallback = null)
+    {
+        parent::__construct($model);
+    }
     /**
      * Pipeline de modifiers padrão. Sobrescreva para adicionar/remover etapas.
      *
@@ -69,12 +73,14 @@ class DatabaseSource extends AbstractSource
     {
         $query = $this->baseQuery();
 
-        if ($context === null) {
-            return $query;
+        if ($context !== null) {
+            foreach ($this->getModifiers() as $modifier) {
+                $query = $modifier->apply($query, $request, $context);
+            }
         }
 
-        foreach ($this->getModifiers() as $modifier) {
-            $query = $modifier->apply($query, $request, $context);
+        if ($this->queryCallback !== null) {
+            $query = $this->evaluate($this->queryCallback, ['query' => $query]) ?? $query;
         }
 
         return $query;

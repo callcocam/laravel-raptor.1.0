@@ -22,8 +22,20 @@ class TableQueryContext
      */
     public function __construct(
         protected array $columns = [],
-        protected array $filters = []
+        protected array $filters = [],
+        protected ?string $defaultSortColumn = null,
+        protected string $defaultSortDirection = 'asc'
     ) {}
+
+    public function getDefaultSortColumn(): ?string
+    {
+        return $this->defaultSortColumn;
+    }
+
+    public function getDefaultSortDirection(): string
+    {
+        return $this->defaultSortDirection;
+    }
 
     /**
      * @return array<int, AbstractColumn>

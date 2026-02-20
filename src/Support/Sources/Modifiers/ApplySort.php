@@ -26,6 +26,11 @@ class ApplySort implements QueryModifier
         $sortDir = strtolower($request->get('sort_dir', 'asc')) === 'desc' ? 'desc' : 'asc';
 
         if ($sortName === null || $sortName === '') {
+            $sortName = $context->getDefaultSortColumn();
+            $sortDir = $context->getDefaultSortDirection();
+        }
+
+        if ($sortName === null || $sortName === '') {
             return $query;
         }
 

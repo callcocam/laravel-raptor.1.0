@@ -46,7 +46,66 @@ class TableBuilder
 
     protected ?SourceContract $source = null;
 
+    /** @var Closure|null Recebe (Builder $query) para customizar a query (ex.: eager load). */
+    protected ?Closure $queryCallback = null;
+
+    protected bool $selectable = false;
+
+    /** @var Closure|null Se null, usa Model::getKey() como valor de seleção. */
+    protected ?Closure $selectableKeyResolver = null;
+
+    protected ?string $defaultSortColumn = null;
+
+    protected string $defaultSortDirection = 'asc';
+
     public function __construct(protected Request $request, protected ?Model $model = null) {}
+
+    /**
+     * Define ordenação padrão quando a request não envia sort/sort_dir.
+     */
+    public function defaultSort(string $column, string $direction = 'asc'): static
+    {
+        $this->defaultSortColumn = $column;
+        $this->defaultSortDirection = strtolower($direction) === 'desc' ? 'desc' : 'asc';
+
+        return $this;
+    }
+
+    /**
+     * Customiza a query (ex.: eager load). Closure recebe o Builder.
+     *
+     * @param  Closure(\Illuminate\Database\Eloquent\Builder): (\Illuminate\Database\Eloquent\Builder|void)  $callback
+     */
+    public function queryUsing(Closure $callback): static
+    {
+        $this->queryCallback = $callback;
+
+        return $this;
+    }
+
+    /**
+     * Habilita checkboxes por linha e "selecionar tudo".
+     * Passar true para usar o id do model, ou Closure (Model $model) => value para chave customizada.
+     *
+     * @param  bool|Closure(Model): (string|int)  $value
+     */
+    public function selectable(bool|Closure $value = true): static
+    {
+        $this->selectable = $value !== false;
+
+        if ($value instanceof Closure) {
+            $this->selectableKeyResolver = $value;
+        } else {
+            $this->selectableKeyResolver = null;
+        }
+
+        return $this;
+    }
+
+    public function isSelectable(): bool
+    {
+        return $this->selectable;
+    }
 
     public function source(SourceContract $source): static
     {
@@ -65,7 +124,12 @@ class TableBuilder
     public function render(): array
     {
         $resolvedColumns = $this->getResolvedColumns();
-        $context = new TableQueryContext($resolvedColumns, $this->getResolvedFilters());
+        $context = new TableQueryContext(
+            $resolvedColumns,
+            $this->getResolvedFilters(),
+            $this->defaultSortColumn,
+            $this->defaultSortDirection
+        );
 
         $source = $this->getSource();
         $result = $source->getData($this->request, $context);
@@ -88,6 +152,10 @@ class TableBuilder
             'data' => $rows,
             'meta' => $meta,
         ];
+
+        if ($this->selectable) {
+            $payload['selectable'] = true;
+        }
 
         if ($this->hasActions()) {
             $payload['actions'] = array_map(
@@ -118,7 +186,7 @@ class TableBuilder
         }
 
         $model = $this->model;
-        $source = new DatabaseSource($model);
+        $source = new DatabaseSource($model, $this->queryCallback);
         $this->source = $source;
 
         return $source;
@@ -192,6 +260,12 @@ class TableBuilder
 
         if ($item instanceof Model && $item->getKey()) {
             $row['id'] = $item->getKey();
+        }
+
+        if ($this->selectable && $item instanceof Model) {
+            $row['_selectId'] = $this->selectableKeyResolver
+                ? $this->evaluate($this->selectableKeyResolver, ['model' => $item])
+                : $item->getKey();
         }
 
         foreach ($columns as $column) {
