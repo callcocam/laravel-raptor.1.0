@@ -26,7 +26,7 @@ class LaravelRaptorServiceProvider extends PackageServiceProvider
             ->hasViews()
             ->hasMigrations([
                 'create_tenants_table',
-                'create_tenant_domains_table', 
+                'create_tenant_domains_table',
                 'create_roles_table',
                 'create_role_user_table',
                 'create_permissions_table',
@@ -36,8 +36,8 @@ class LaravelRaptorServiceProvider extends PackageServiceProvider
             ->hasCommand(LaravelRaptorCommand::class)
             ->hasCommand(SyncPermissionsCommand::class)
             ->hasInstallCommand(function (InstallCommand $command) {
-               /* TODO: Implementar o comando de instalação */ 
-               $command->publishMigrations()->askToRunMigrations();
+                /* TODO: Implementar o comando de instalação */
+                $command->publishMigrations()->askToRunMigrations();
             });
     }
 
