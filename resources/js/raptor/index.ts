@@ -37,6 +37,7 @@ ComponentRegistry.registerBulk({
     'table-renderer': defineAsyncComponent(() => import('@raptor/components/table/TableRenderer.vue')),
     'table-footer': defineAsyncComponent(() => import('@raptor/components/table/TableFooter.vue')),
     'table-bulk-action-inline': defineAsyncComponent(() => import('@raptor/components/table/actions/TableBulkActionInline.vue')),
+    'table-summary': defineAsyncComponent(() => import('@raptor/components/table/TableSummary.vue')),
     'data-table': defineAsyncComponent(() => import('@raptor/components/table/DataTable.vue')),
 })
 

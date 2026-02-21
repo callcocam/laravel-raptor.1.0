@@ -61,6 +61,8 @@ class TableBuilder
 
     protected ?bool $dropdownActions = null;
 
+    protected string $summaryPosition = 'top';
+
     protected array $tableComponents = [
         'header' => 'table-header',
         'filters' => 'table-filters',
@@ -71,7 +73,7 @@ class TableBuilder
         'dropdownActions' => 'table-action-dropdown',
         'pagination' => null,
         'selectable' => null,
-        'summary' => null,
+        'summary' => 'table-summary',
     ];
 
     public function __construct(protected Request $request, protected ?Model $model = null) {}
@@ -133,6 +135,16 @@ class TableBuilder
     public function hasDropdownActions(): bool
     {
         return $this->dropdownActions !== null && $this->dropdownActions === true;
+    }
+
+    /**
+     * Define a posição do bloco de summary: 'top' (acima da tabela) ou 'bottom' (abaixo).
+     */
+    public function summaryPosition(string $position): static
+    {
+        $this->summaryPosition = in_array($position, ['top', 'bottom'], true) ? $position : 'top';
+
+        return $this;
     }
 
     public function tableComponents(array $components): static
@@ -228,8 +240,12 @@ class TableBuilder
 
         if ($this->hasSummarizers()) {
             $payload['summary'] = $this->buildSummary($source, $context, $rows);
+            $payload['summaryPosition'] = $this->summaryPosition;
         }
-        Storage::put('payload.json', json_encode($payload, JSON_PRETTY_PRINT));
+
+        if (config('app.debug')) {
+            Storage::disk('local')->put('payload.json', json_encode($payload, JSON_PRETTY_PRINT));
+        }
 
         return $payload;
     }
@@ -291,6 +307,8 @@ class TableBuilder
                 'label' => $summarizer->getLabel(),
                 'column' => $summarizer->getColumn(),
                 'function' => $summarizer->getFunction(),
+                'prefix' => method_exists($summarizer, 'getPrefix') ? $summarizer->getPrefix() : null,
+                'suffix' => method_exists($summarizer, 'getSuffix') ? $summarizer->getSuffix() : null,
             ];
         }
 

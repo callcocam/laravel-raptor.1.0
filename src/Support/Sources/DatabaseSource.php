@@ -117,6 +117,8 @@ class DatabaseSource extends AbstractSource
                 'label' => $summarizer->getLabel(),
                 'column' => $summarizer->getColumn(),
                 'function' => $summarizer->getFunction(),
+                'prefix' => method_exists($summarizer, 'getPrefix') ? $summarizer->getPrefix() : null,
+                'suffix' => method_exists($summarizer, 'getSuffix') ? $summarizer->getSuffix() : null,
             ];
         }
 

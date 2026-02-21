@@ -10,8 +10,13 @@ namespace Callcocam\LaravelRaptor\Support\Table\Summarizers;
 
 use Callcocam\LaravelRaptor\Support\Concerns\EvaluatesClosures;
 use Callcocam\LaravelRaptor\Support\Concerns\FactoryPattern;
+use Callcocam\LaravelRaptor\Support\Concerns\Shared\BelongsToBadge;
+use Callcocam\LaravelRaptor\Support\Concerns\Shared\BelongsToColor;
+use Callcocam\LaravelRaptor\Support\Concerns\Shared\BelongsToIcon;
+use Callcocam\LaravelRaptor\Support\Concerns\Shared\BelongsToPrefixSuffix;
 use Closure;
 use Illuminate\Database\Eloquent\Builder;
+use NumberFormatter;
 
 /**
  * Sumarização de colunas da tabela.
@@ -21,6 +26,10 @@ class Summarizer
 {
     use EvaluatesClosures;
     use FactoryPattern;
+    use BelongsToBadge;
+    use BelongsToColor;
+    use BelongsToIcon;
+    use BelongsToPrefixSuffix;
 
     protected string $column;
 
@@ -38,27 +47,27 @@ class Summarizer
 
     public static function sum(string $column): static
     {
-        return new static($column, 'sum');
+        return (new static($column, 'sum'))->badge('success');
     }
 
     public static function avg(string $column): static
     {
-        return new static($column, 'avg');
+        return (new static($column, 'avg'))->badge('success');
     }
 
     public static function min(string $column): static
     {
-        return new static($column, 'min');
+        return (new static($column, 'min'))->badge('success');
     }
 
     public static function max(string $column): static
     {
-        return new static($column, 'max');
+        return (new static($column, 'max'))->badge('success');
     }
 
     public static function count(string $column = '*'): static
     {
-        return new static($column, 'count');
+        return (new static($column, 'count'))->badge('success');
     }
 
     public function label(Closure|string $label): static
@@ -112,8 +121,8 @@ class Summarizer
     public function computeFromRows(array $rows): mixed
     {
         $values = array_filter(
-            array_map(fn ($row) => $row[$this->column] ?? null, $rows),
-            fn ($v) => $v !== null && $v !== ''
+            array_map(fn($row) => $row[$this->column] ?? null, $rows),
+            fn($v) => $v !== null && $v !== ''
         );
 
         if (count($values) === 0) {
@@ -140,6 +149,8 @@ class Summarizer
             'column' => $this->column,
             'function' => $this->function,
             'label' => $this->getLabel(),
+            'prefix' => $this->getPrefix(),
+            'suffix' => $this->getSuffix(),
         ];
     }
 
@@ -149,6 +160,30 @@ class Summarizer
             return ($this->formatUsing)($value);
         }
 
+        if (is_numeric($value)) {
+            return $this->formatWithIntl((float) $value);
+        }
+
         return $value;
+    }
+
+    /**
+     * Formata número com Intl NumberFormatter (locale pt_BR, decimais conforme a função).
+     */
+    protected function formatWithIntl(float $value): string
+    {
+        $locale = config('app.locale', 'pt_BR');
+        $formatter = new NumberFormatter($locale, NumberFormatter::DECIMAL);
+
+        if ($this->function === 'count') {
+            $formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, 0);
+        } else {
+            $formatter->setAttribute(NumberFormatter::MIN_FRACTION_DIGITS, 0);
+            $formatter->setAttribute(NumberFormatter::MAX_FRACTION_DIGITS, 2);
+        }
+
+        $formatted = $formatter->format($value);
+
+        return $formatted !== false ? $formatted : (string) $value;
     }
 }

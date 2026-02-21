@@ -14,6 +14,8 @@
         :bulk-actions="table?.bulkActions"
         :filters="table?.filters"
         :components="table?.components"
+        :summary="table?.summary"
+        :summary-position="table?.summaryPosition ?? 'top'"
       />
     </div>
   </ResourseLayout>

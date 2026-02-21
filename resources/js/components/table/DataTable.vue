@@ -8,6 +8,13 @@
       @action="handleHeaderAction"
     />
     <div class="space-y-4">
+      <template v-if="summary && resolvedComponents.summary">
+        <component
+          v-if="summaryPosition === 'top'"
+          :is="resolvedComponents.summary"
+          :summary="summary"
+        />
+      </template>
       <component
         :is="resolvedComponents.filters"
         v-model:search="search"
@@ -40,6 +47,13 @@
         @sort="handleSort"
         @row-action="handleRowAction"
       />
+      <template v-if="summary && resolvedComponents.summary">
+        <component
+          v-if="summaryPosition === 'bottom'"
+          :is="resolvedComponents.summary"
+          :summary="summary"
+        />
+      </template>
       <component
         :is="resolvedComponents.footer"
         :selected-count="selectedIds.length"
@@ -70,6 +84,11 @@ const props = withDefaults(defineProps<{
   bulkActions?: TableAction[]
   filters?: Filter[]
   components?: TableComponents
+  summary?: Record<string, Record<string, { value: unknown; label?: string }>>
+  /**
+   * Posição do bloco de summary: 'top' (acima da tabela) ou 'bottom' (abaixo).
+   */
+  summaryPosition?: 'top' | 'bottom'
   /**
    * Se true, o DataTable gerencia navegação/estado internamente
    * Se false, emite eventos para o componente pai gerenciar
@@ -82,6 +101,7 @@ const props = withDefaults(defineProps<{
 }>(), {
   selectable: false,
   rowActions: true,
+  summaryPosition: 'top',
   managed: true,
   searchDebounce: 300,
 })
@@ -120,7 +140,7 @@ const {
 const hasActiveFilters = computed(() => {
   return !!search.value || !!currentSort.value
 })
-console.log('DataTable Props:', props)
+
 // Handlers que decidem entre modo gerenciado e manual
 function handleSort(column: string) {
   if (props.managed) {
@@ -200,6 +220,7 @@ const resolvedComponents = computed(() => {
     renderer: 'table-renderer',
     footer: 'table-footer',
     bulkActions: 'table-bulk-action-inline',
+    summary: 'table-summary',
   }
 
   const resolved: Record<string, Component | null> = {}
@@ -215,6 +236,7 @@ const resolvedComponents = computed(() => {
     renderer: Component
     footer: Component
     bulkActions: Component
+    summary: Component | null
   }
 })
 

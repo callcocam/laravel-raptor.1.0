@@ -47,6 +47,7 @@ export interface TablePayload {
   bulkActions?: Action[]
   selectable?: boolean
   summary?: Record<string, unknown>
+  summaryPosition?: 'top' | 'bottom'
 }
 
 // ============================================================================
