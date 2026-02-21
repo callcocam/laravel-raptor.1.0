@@ -86,25 +86,28 @@ class UrlAction extends AbstractAction
         }
 
         return array_merge($base, [
-            'url' => $model ? $this->resolveUrl($model) : null,
+            'url' => $this->resolveUrl($model),
             'inertia' => $this->useInertia,
             'target' => $this->target,
             'method' => $this->method,
         ]);
     }
 
-    protected function resolveUrl(Model $model): ?string
+    /**
+     * Resolve URL com ou sem model (rotas estáticas como index).
+     */
+    protected function resolveUrl(?Model $model): ?string
     {
         if ($this->routeName !== null) {
-            $params = $this->routeParams instanceof Closure
+            $params = $this->routeParams instanceof Closure && $model !== null
                 ? ($this->routeParams)($model)
-                : ($this->routeParams ?? []);
+                : (is_array($this->routeParams) ? $this->routeParams : []);
 
             return route($this->routeName, $params);
         }
 
         if ($this->url instanceof Closure) {
-            return ($this->url)($model);
+            return $model !== null ? ($this->url)($model) : null;
         }
 
         return $this->url;

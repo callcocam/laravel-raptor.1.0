@@ -80,9 +80,11 @@ ComponentRegistry.registerBulk({
  * Estes componentes são usados em formulários e modais de ações
  */
 
-// New Field-based components (recommended)
 ComponentRegistry.registerBulk({
-    // 'form-field-text': defineAsyncComponent(() => import('@raptor/components/form/fields/FormFieldText.vue')), 
+    'form-renderer': defineAsyncComponent(() => import('@raptor/components/form/FormRenderer.vue')),
+    'form-field-text': defineAsyncComponent(() => import('@raptor/components/form/fields/FormFieldText.vue')),
+    'form-field-textarea': defineAsyncComponent(() => import('@raptor/components/form/fields/FormFieldTextarea.vue')),
+    'form-field-select': defineAsyncComponent(() => import('@raptor/components/form/fields/FormFieldSelect.vue')),
 })
 
 /**

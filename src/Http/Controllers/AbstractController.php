@@ -147,13 +147,13 @@ class AbstractController extends BaseController
         return new TableBuilder($request, $this->getModel());
     }
 
-    protected function getFormBuilder(Request $request): ?FormBuilder
+    protected function getFormBuilder(Request $request, ?Model $model = null): FormBuilder
     {
         if ($this->formBuilder) {
-            return app($this->formBuilder, ['request' => $request]);
+            return app($this->formBuilder, ['request' => $request, 'model' => $model]);
         }
 
-        return new FormBuilder($request);
+        return new FormBuilder($request, $model);
     }
 
     protected function getInfoBuilder(Request $request): ?InfoBuilder
@@ -263,7 +263,7 @@ class AbstractController extends BaseController
 
         return Inertia::render($this->getEditPage(), [
             'id' => $id,
-            'form' => $this->form($this->getFormBuilder($request))->render(),
+            'form' => $this->form($this->getFormBuilder($request, $model))->render(),
             'breadcrumbs' => $this->getBreadcrumbs('edit', $model),
         ]);
     }

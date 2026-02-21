@@ -51,6 +51,62 @@ export interface TablePayload {
 }
 
 // ============================================================================
+// Form Types
+// ============================================================================
+
+export interface FormField {
+  name: string
+  label: string
+  component?: string
+  type?: string
+  rules?: string[] | null
+  placeholder?: string | null
+  inputType?: string
+  options?: Array<{ label: string; value: string | number }>
+  rows?: number
+  [key: string]: unknown
+}
+
+export interface FormActionPayload {
+  name: string
+  label: string
+  type: string
+  icon?: string | null
+  variant?: string | null
+  color?: string | null
+  tooltip?: string | null
+  disabled?: boolean
+  url?: string | null
+  inertia?: boolean
+  target?: string
+  method?: string
+  [key: string]: unknown
+}
+
+export interface FormGridLayout {
+  gridColumns?: string | null
+  columnSpan?: string | null
+  order?: number | null
+  gap?: string | null
+  maxWidth?: string | null
+  responsive?: {
+    grid?: { sm?: string; md?: string; lg?: string; xl?: string }
+    span?: { sm?: string; md?: string; lg?: string; xl?: string }
+  }
+}
+
+export interface FormPayload {
+  fields: FormField[]
+  components: Record<string, string>
+  values: Record<string, unknown>
+  submitUrl?: string | null
+  submitMethod?: string
+  headerActions?: FormActionPayload[]
+  footerActions?: FormActionPayload[]
+  gridLayout?: FormGridLayout
+}
+
+// ============================================================================
 // Filter Types
 // ============================================================================
 
