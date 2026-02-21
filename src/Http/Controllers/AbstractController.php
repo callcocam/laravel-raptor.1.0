@@ -20,6 +20,7 @@ use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 class AbstractController extends BaseController
@@ -165,6 +166,72 @@ class AbstractController extends BaseController
     }
 
     /**
+     * Breadcrumbs para listagem, criação, edição e visualização.
+     * Formato esperado pelo front: [['title' => string, 'href' => string|null], ...]
+     *
+     * @return array<int, array{title: string, href?: string|null}>
+     */
+    protected function getBreadcrumbs(string $action, ?Model $model = null): array
+    {
+        $page = $this->getPage();
+        if ($page === null) {
+            return [];
+        }
+
+        $routeName = $page->getRouteName();
+        $label = $page->getLabel() ?? $routeName;
+
+        $indexUrl = route("{$routeName}.index");
+
+        $dashboardItem = [
+            ['title' => 'Painel de controle', 'href' => Route::has('dashboard') ? route('dashboard') : url('/')],
+        ];
+
+        $items = match ($action) {
+            'index' => [
+                ['title' => $label, 'href' => '#'],
+            ],
+            'create' => [
+                ['title' => $label, 'href' => $indexUrl],
+                ['title' => 'Novo', 'href' => '#'],
+            ],
+            'edit' => [
+                ['title' => $label, 'href' => $indexUrl],
+                ['title' => $this->breadcrumbTitleForModel('Editar', $model), 'href' => '#'],
+            ],
+            'show' => [
+                ['title' => $label, 'href' => $indexUrl],
+                ['title' => $this->breadcrumbTitleForModel('Visualizar', $model), 'href' => '#'],
+            ],
+            default => [
+                ['title' => $label, 'href' => $indexUrl],
+            ],
+        };
+
+        return array_merge($dashboardItem, $items);
+    }
+
+    /**
+     * Título do último segmento para edit/show: "Editar" ou "Editar: {nome do modelo}" se existir atributo legível.
+     */
+    protected function breadcrumbTitleForModel(string $actionLabel, ?Model $model): string
+    {
+        if ($model === null) {
+            return $actionLabel;
+        }
+
+        $name = $model->getAttribute('name')
+            ?? $model->getAttribute('title')
+            ?? $model->getAttribute('label');
+
+        if (is_string($name) && $name !== '') {
+            return "{$actionLabel}: {$name}";
+        }
+
+        return $actionLabel;
+    }
+
+    /**
      * Display a listing of the resource.
      *
      * @return InertiaResponse
@@ -175,6 +242,7 @@ class AbstractController extends BaseController
 
         return Inertia::render($this->getIndexPage(), [
             'table' => $this->table($this->getTableBuilder($request))->render(),
+            'breadcrumbs' => $this->getBreadcrumbs('index'),
         ]);
     }
 
@@ -184,6 +252,7 @@ class AbstractController extends BaseController
 
         return Inertia::render($this->getCreatePage(), [
             'form' => $this->form($this->getFormBuilder($request))->render(),
+            'breadcrumbs' => $this->getBreadcrumbs('create'),
         ]);
     }
 
@@ -195,6 +264,7 @@ class AbstractController extends BaseController
         return Inertia::render($this->getEditPage(), [
             'id' => $id,
             'form' => $this->form($this->getFormBuilder($request))->render(),
+            'breadcrumbs' => $this->getBreadcrumbs('edit', $model),
         ]);
     }
 
@@ -206,6 +276,7 @@ class AbstractController extends BaseController
         return Inertia::render($this->getShowPage(), [
             'id' => $id,
             'info' => $this->info($this->getInfoBuilder($request))->render(),
+            'breadcrumbs' => $this->getBreadcrumbs('show', $model),
         ]);
     }
 

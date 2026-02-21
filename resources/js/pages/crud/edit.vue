@@ -6,21 +6,15 @@
 </template>
 
 <script setup lang="ts">
-import ResourseLayout from '@raptor/layouts/ResourseLayout.vue';
-import { Head } from '@inertiajs/vue3';
-import type { BreadcrumbItem } from '@/types';
-import { dashboard } from '@/routes';
+import { computed } from 'vue'
+import { Head, usePage } from '@inertiajs/vue3'
+import ResourseLayout from '@raptor/layouts/ResourseLayout.vue'
+import type { BreadcrumbItem } from '@/types'
 
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Crud',
-        href: dashboard().url,
-    },
-    {
-        title: 'Edit',
-        href: '#',
-    },
-];
+const page = usePage()
+const breadcrumbs = computed(
+  () => (page.props.breadcrumbs as BreadcrumbItem[] | undefined) ?? []
+)
 </script>
 
 <style scoped>

@@ -28,7 +28,6 @@ import ResourseLayout from '@raptor/layouts/ResourseLayout.vue'
 import DataTable from '@raptor/components/table/DataTable.vue'
 import type { BreadcrumbItem } from '@/types'
 import type { TablePayload } from '@raptor/types'
-import { dashboard } from '@/routes'
 
 const page = usePage()
 const table = computed(() => (page.props.table as TablePayload | undefined) ?? null)
@@ -36,10 +35,9 @@ const table = computed(() => (page.props.table as TablePayload | undefined) ?? n
 const title = computed(() => (page.props.__class__ as string) ?? 'Listagem')
 const subtitle = computed(() => '')
 
-const breadcrumbs: BreadcrumbItem[] = [
-  { title: 'Crud', href: dashboard().url },
-  { title: 'Index', href: '#' },
-]
+const breadcrumbs = computed(
+  () => (page.props.breadcrumbs as BreadcrumbItem[] | undefined) ?? []
+)
 </script>
 
 <style scoped></style>
