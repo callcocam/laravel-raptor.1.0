@@ -54,6 +54,21 @@ export interface TablePayload {
 // Form Types
 // ============================================================================
 
+/**
+ * Contrato padrão para todos os campos de formulário (incluindo customizados).
+ * O componente principal (FormRenderer) sempre passa modelValue e escuta apenas:
+ * - update:modelValue(value: unknown)
+ * Campos personalizados devem seguir este contrato para integrar sem alterar o form.
+ */
+export interface FormFieldEmitContract {
+  'update:modelValue': [value: unknown]
+}
+
+export interface FormFieldPropsContract {
+  field: FormField | FormRepeater | FormSection
+  modelValue: unknown
+}
+
 export interface FormField {
   name: string
   label: string
@@ -64,6 +79,19 @@ export interface FormField {
   inputType?: string
   options?: Array<{ label: string; value: string | number }>
   rows?: number
+  [key: string]: unknown
+}
+
+export interface FormRepeater {
+  type: 'repeater'
+  name: string
+  label?: string | null
+  component?: string
+  fields: FormField[]
+  reorderable?: boolean
+  minItems?: number | null
+  maxItems?: number | null
+  addLabel?: string | null
   [key: string]: unknown
 }
 
@@ -107,7 +135,7 @@ export interface FormSection {
   fields: FormField[]
 }
 
-export type FormFieldOrSection = FormField | FormSection
+export type FormFieldOrSection = FormField | FormSection | FormRepeater
 
 export interface FormPayload {
   fields: FormFieldOrSection[]

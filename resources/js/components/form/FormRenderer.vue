@@ -116,7 +116,6 @@ function getModelValue(item: FormFieldOrSection): unknown {
 
 function setModelValue(item: FormFieldOrSection, value: unknown): void {
     if (isSection(item)) return;
-    console.log('setModelValue', item, value);
     formData[(item as FormField).name] = value;
 }
 

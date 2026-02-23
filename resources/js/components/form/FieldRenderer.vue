@@ -31,6 +31,13 @@ const resolvedComponent = computed<Component | null>(() => {
       null
     )
   }
+  if (f.type === 'repeater') {
+    return (
+      ComponentRegistry.get(f.component ?? 'form-field-repeater') ??
+      ComponentRegistry.get('form-field-repeater') ??
+      null
+    )
+  }
   const name = f.component ?? 'form-field-text'
   return (
     ComponentRegistry.get(name) ??
