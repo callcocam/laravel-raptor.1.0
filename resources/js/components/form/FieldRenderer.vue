@@ -11,10 +11,10 @@
 <script lang="ts" setup>
 import { computed, type Component } from 'vue'
 import ComponentRegistry from '@raptor/utils/ComponentRegistry'
-import type { FormField } from '@raptor/types'
+import type { FormFieldOrSection } from '@raptor/types'
 
 const props = defineProps<{
-  field: FormField
+  field: FormFieldOrSection
   modelValue: unknown
 }>()
 
@@ -23,7 +23,19 @@ const emit = defineEmits<{
 }>()
 
 const resolvedComponent = computed<Component | null>(() => {
-  const name = props.field.component ?? 'form-field-text'
-  return ComponentRegistry.get(name) ?? ComponentRegistry.get('form-field-text')
+  const f = props.field as { type?: string; component?: string }
+  if (f.type === 'section') {
+    return (
+      ComponentRegistry.get(f.component ?? 'form-field-section') ??
+      ComponentRegistry.get('form-field-section') ??
+      null
+    )
+  }
+  const name = f.component ?? 'form-field-text'
+  return (
+    ComponentRegistry.get(name) ??
+    ComponentRegistry.get('form-field-text') ??
+    null
+  )
 })
 </script>

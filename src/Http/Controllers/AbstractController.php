@@ -287,7 +287,7 @@ class AbstractController extends BaseController
 
         $model->delete();
 
-        return redirect()->route($this->getIndexPage());
+        return redirect()->back()->with('success', 'Registro excluído com sucesso.');
     }
 
     public function store(Request $request)
@@ -296,17 +296,18 @@ class AbstractController extends BaseController
 
         $model = $this->getModel()->create($request->all());
 
-        return redirect()->route($this->getIndexPage());
+        return redirect()->back()->with('success', 'Registro criado com sucesso.');
     }
 
     public function update(Request $request, string $id)
     {
+        dd($request->all());
         $model = $this->getModel()->findOrFail($id);
         $this->authorizeRoute('update', $model);
 
         $model->update($request->all());
 
-        return redirect()->route($this->getIndexPage());
+        return redirect()->back()->with('success', 'Registro atualizado com sucesso.');
     }
 
     /**

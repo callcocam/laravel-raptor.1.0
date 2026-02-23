@@ -11,6 +11,7 @@ namespace Callcocam\LaravelRaptor\Support\Concerns\Interacts;
 use Callcocam\LaravelRaptor\Support\AbstractColumn;
 use Closure;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
 
 trait WithColumns
 {
@@ -63,10 +64,18 @@ trait WithColumns
     /**
      * Get the columns for the builder.
      */
-    public function getColumns(?Model $model = null): mixed
+    public function getColumns(?Model $model = null, ?Request $request = null): mixed
     {
         return $this->evaluate($this->columns, [
             'model' => $model,
+            'request' => $request,
         ]);
+    }
+
+    public function setValue(string $name, mixed $value): static
+    {
+        $this->values[$name] = $value;
+
+        return $this;
     }
 }

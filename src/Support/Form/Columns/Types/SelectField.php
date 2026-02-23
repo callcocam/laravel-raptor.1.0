@@ -10,6 +10,8 @@ namespace Callcocam\LaravelRaptor\Support\Form\Columns\Types;
 
 use Callcocam\LaravelRaptor\Support\Form\Columns\Column;
 use Closure;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
 
 class SelectField extends Column
 {
@@ -38,9 +40,9 @@ class SelectField extends Column
         return is_array($evaluated) ? $evaluated : [];
     }
 
-    public function toArray(): array
+    public function toArray(?Model $model = null, ?Request $request = null): array
     {
-        return array_merge(parent::toArray(), [
+        return array_merge(parent::toArray($model, $request), [
             'options' => $this->getOptions(),
         ]);
     }

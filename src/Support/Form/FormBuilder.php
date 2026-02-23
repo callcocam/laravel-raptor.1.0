@@ -15,9 +15,12 @@ use Callcocam\LaravelRaptor\Support\Concerns\HasGridLayout;
 use Callcocam\LaravelRaptor\Support\Concerns\Interacts\WithColumns;
 use Callcocam\LaravelRaptor\Support\Concerns\Interacts\WithFooterActions;
 use Callcocam\LaravelRaptor\Support\Concerns\Interacts\WithHeaderActions;
+use Callcocam\LaravelRaptor\Support\Concerns\Shared\BelongToRequest;
+use Callcocam\LaravelRaptor\Support\Form\Columns\Types\SectionField;
 use Closure;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class FormBuilder
 {
@@ -26,6 +29,7 @@ class FormBuilder
     use WithColumns;
     use WithFooterActions;
     use WithHeaderActions;
+    use BelongToRequest;
 
     /**
      * @var Closure|array<int, AbstractColumn>
@@ -40,7 +44,13 @@ class FormBuilder
         'renderer' => 'form-renderer',
     ];
 
-    public function __construct(protected Request $request, protected ?Model $model = null) {}
+    /** @var array<string, mixed> Usado pelo trait WithColumns (setValue). Valores do form vêm de getFormValues() dos fields. */
+    protected array $values = [];
+
+    public function __construct(Request $request, protected ?Model $model = null)
+    {
+        $this->request($request);
+    }
 
     public function submitUrl(string $url): static
     {
@@ -87,14 +97,15 @@ class FormBuilder
      */
     public function render(): array
     {
-        $resolvedFields = $this->getResolvedFields();
-
+        $fields = $this->buildFields($this->getResolvedFields());
         $payload = [
-            'fields' => array_map(fn (AbstractColumn $f) => $f->toArray(), $resolvedFields),
+            'fields' => $fields,
             'components' => $this->getFormComponents(),
-            'values' => $this->buildValues($resolvedFields),
         ];
-
+        if ($this->model !== null) {
+            $payload['values'] = $this->buildModelValues();
+            $payload['model'] = $payload['values'];
+        }
         if ($this->submitUrl !== null) {
             $payload['submitUrl'] = $this->submitUrl;
             $payload['submitMethod'] = $this->submitMethod;
@@ -107,7 +118,7 @@ class FormBuilder
         if ($gridConfig !== []) {
             $payload['gridLayout'] = $gridConfig;
         }
-
+        Storage::disk('local')->put('payload-form.json', json_encode($payload, JSON_PRETTY_PRINT));
         return $payload;
     }
 
@@ -129,11 +140,11 @@ class FormBuilder
     }
 
     /**
-     * @return array<int, AbstractColumn>
+     * @return array<int, AbstractColumn|SectionField>
      */
     protected function getResolvedFields(): array
     {
-        $evaluated = $this->getColumns($this->model);
+        $evaluated = $this->getColumns($this->model, $this->getRequest());
         if (! is_array($evaluated)) {
             return [];
         }
@@ -142,19 +153,34 @@ class FormBuilder
     }
 
     /**
-     * @param  array<int, AbstractColumn>  $fields
-     * @return array<string, mixed>
+     * Um único array de itens: cada item é um campo (toArray) ou uma section (toArray com type section).
+     * Cada field é responsável por seu próprio toArray(); o form não trata dados aqui.
+     *
+     * @param  array<int, AbstractColumn|SectionField>  $resolved
+     * @return array<int, array<string, mixed>>
      */
-    protected function buildValues(array $fields): array
+    protected function buildFields(array $resolved): array
     {
-        if ($this->model === null) {
-            return [];
+        $fields = [];
+        foreach ($resolved as $column) {
+            $fields[] = $column->toArray($this->getModel(), $this->getRequest());
         }
 
-        $values = [];
-        foreach ($fields as $field) {
-            $name = $field->getName();
-            $values[$name] = $this->model->getAttribute($name);
+        return $fields;
+    }
+
+    /**
+     * Valores do model para o payload. Cada field contribui com getFormValues(); o form só agrega.
+     *
+     * @return array<string, mixed>
+     */
+    protected function buildModelValues(): array
+    {
+        $values = $this->model->toArray();
+        foreach ($this->getResolvedFields() as $column) {
+            if (method_exists($column, 'getFormValues')) {
+                $values = array_replace_recursive($values, $column->getFormValues($this->model, $this->getRequest()));
+            }
         }
 
         return $values;

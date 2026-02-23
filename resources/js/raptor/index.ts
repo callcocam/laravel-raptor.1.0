@@ -82,6 +82,7 @@ ComponentRegistry.registerBulk({
 
 ComponentRegistry.registerBulk({
     'form-renderer': defineAsyncComponent(() => import('@raptor/components/form/FormRenderer.vue')),
+    'form-field-section': defineAsyncComponent(() => import('@raptor/components/form/sections/FormFieldSection.vue')),
     'form-field-text': defineAsyncComponent(() => import('@raptor/components/form/fields/FormFieldText.vue')),
     'form-field-textarea': defineAsyncComponent(() => import('@raptor/components/form/fields/FormFieldTextarea.vue')),
     'form-field-select': defineAsyncComponent(() => import('@raptor/components/form/fields/FormFieldSelect.vue')),

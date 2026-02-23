@@ -71,6 +71,9 @@ const actionTypeMap: Record<string, string> = {
   edit: 'action-link',
   delete: 'action-confirm',
   create: 'action-link',
+  submit: 'action-button',
+  cancel: 'action-link',
+  url: 'action-link',
 }
 
 const resolvedComponent = computed(() => {

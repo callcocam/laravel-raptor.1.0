@@ -95,8 +95,21 @@ export interface FormGridLayout {
   }
 }
 
-export interface FormPayload {
+export interface FormSection {
+  type: 'section'
+  name?: string | null
+  label?: string | null
+  relationship?: string | null
+  statePath?: string | null
+  collapsible?: boolean
+  defaultOpen?: boolean
   fields: FormField[]
+}
+
+export type FormFieldOrSection = FormField | FormSection
+
+export interface FormPayload {
+  fields: FormFieldOrSection[]
   components: Record<string, string>
   values: Record<string, unknown>
   submitUrl?: string | null
@@ -131,7 +144,8 @@ export interface TableAction {
   label: string
   component?: string
   actionType?: string
-  url?: string
+  type?: string
+  url?: string | null
   confirm?: boolean
   to?: string
   target?: string
