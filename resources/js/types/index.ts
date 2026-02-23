@@ -92,6 +92,10 @@ export interface FormRepeater {
   minItems?: number | null
   maxItems?: number | null
   addLabel?: string | null
+  gridColumns?: string | null
+  gap?: string | null
+  collapsible?: boolean
+  defaultOpen?: boolean
   [key: string]: unknown
 }
 

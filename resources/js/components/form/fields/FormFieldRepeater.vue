@@ -1,5 +1,97 @@
 <template>
-  <div class="space-y-3">
+  <Collapsible
+    v-if="field.collapsible !== false"
+    :default-open="field.defaultOpen !== false"
+    class="group/repeater-section overflow-hidden rounded-lg border border-border"
+  >
+    <CollapsibleTrigger
+      as-child
+      class="flex w-full cursor-pointer items-center justify-between gap-2 rounded-t-lg border-b border-border bg-muted/30 px-3 py-3 outline-none focus-visible:ring-2 focus-visible:ring-ring"
+    >
+      <button type="button" class="flex flex-1 items-center gap-2 text-left">
+        <ChevronDown
+          class="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200 group-data-[state=open]/repeater-section:rotate-180"
+        />
+        <span class="text-sm font-medium text-foreground">
+          {{ field.label ?? 'Itens' }}
+        </span>
+        <span v-if="items.length > 0" class="text-xs text-muted-foreground">
+          ({{ items.length }} {{ items.length === 1 ? 'item' : 'itens' }})
+        </span>
+      </button>
+    </CollapsibleTrigger>
+    <CollapsibleContent>
+      <div class="space-y-3 p-3">
+        <div class="space-y-2">
+          <div
+            v-for="(row, index) in items"
+            :key="rowKey(index)"
+            class="flex flex-wrap items-start gap-2 rounded-lg border border-border bg-muted/30 p-3"
+          >
+            <div
+              v-if="field.reorderable !== false"
+              class="flex shrink-0 flex-col gap-0.5"
+              aria-label="Reordenar"
+            >
+              <button
+                type="button"
+                class="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-40"
+                :disabled="index === 0"
+                aria-label="Mover para cima"
+                @click="moveUp(index)"
+              >
+                <ChevronUp class="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                class="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-40"
+                :disabled="index === items.length - 1"
+                aria-label="Mover para baixo"
+                @click="moveDown(index)"
+              >
+                <ChevronDown class="h-4 w-4" />
+              </button>
+            </div>
+            <div :class="formClasses" class="min-w-0 flex-1">
+              <div
+                v-for="innerField in field.fields"
+                :key="innerField.name"
+                :class="getColumnClasses(innerField)"
+                :style="(getColumnStyles(innerField) as Record<string, string | number>)"
+                class="space-y-2"
+              >
+                <FieldRenderer
+                  :field="innerField"
+                  :model-value="getRowValue(row, innerField)"
+                  @update:model-value="setRowValue(index, innerField, $event)"
+                />
+              </div>
+            </div>
+            <button
+              v-if="canRemove"
+              type="button"
+              class="shrink-0 rounded p-1 text-destructive hover:bg-destructive/10"
+              aria-label="Remover item"
+              @click="removeRow(index)"
+            >
+              <Trash2 class="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+        <div v-if="canAdd" class="flex w-full justify-center">
+          <button
+            type="button"
+            class="flex items-center gap-2 rounded-md border border-dashed border-border bg-transparent px-3 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
+            @click="addRow"
+          >
+            <Plus class="h-4 w-4" />
+            {{ field.addLabel ?? 'Adicionar' }}
+          </button>
+        </div>
+      </div>
+    </CollapsibleContent>
+  </Collapsible>
+  <div v-else class="space-y-3">
     <div v-if="field.label" class="text-sm font-medium text-foreground">
       {{ field.label }}
     </div>
@@ -33,14 +125,20 @@
             <ChevronDown class="h-4 w-4" />
           </button>
         </div>
-        <div class="min-w-0 flex-1 space-y-2">
-          <FieldRenderer
+        <div :class="formClasses" class="min-w-0 flex-1">
+          <div
             v-for="innerField in field.fields"
             :key="innerField.name"
-            :field="innerField"
-            :model-value="getRowValue(row, innerField)"
-            @update:model-value="setRowValue(index, innerField, $event)"
-          />
+            :class="getColumnClasses(innerField)"
+            :style="(getColumnStyles(innerField) as Record<string, string | number>)"
+            class="space-y-2"
+          >
+            <FieldRenderer
+              :field="innerField"
+              :model-value="getRowValue(row, innerField)"
+              @update:model-value="setRowValue(index, innerField, $event)"
+            />
+          </div>
         </div>
         <button
           v-if="canRemove"
@@ -53,23 +151,30 @@
         </button>
       </div>
     </div>
-    <button
-      v-if="canAdd"
-      type="button"
-      class="flex items-center gap-2 rounded-md border border-dashed border-border bg-transparent px-3 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
-      @click="addRow"
-    >
-      <Plus class="h-4 w-4" />
-      {{ field.addLabel ?? 'Adicionar' }}
-    </button>
+    <div v-if="canAdd" class="flex w-full justify-center">
+      <button
+        type="button"
+        class="flex items-center gap-2 rounded-md border border-dashed border-border bg-transparent px-3 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
+        @click="addRow"
+      >
+        <Plus class="h-4 w-4" />
+        {{ field.addLabel ?? 'Adicionar' }}
+      </button>
+    </div>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { computed } from 'vue'
 import { ChevronUp, ChevronDown, Plus, Trash2 } from 'lucide-vue-next'
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible'
 import FieldRenderer from '@raptor/components/form/FieldRenderer.vue'
 import { useFormField } from '@raptor/composables/useFormField'
+import { useGridLayout } from '@raptor/composables/useGridLayout'
 import type { FormRepeater, FormField } from '@raptor/types'
 
 const props = withDefaults(
@@ -78,6 +183,14 @@ const props = withDefaults(
     modelValue: unknown
   }>(),
   {},
+)
+
+const { getFormClasses, getColumnClasses, getColumnStyles } = useGridLayout()
+const formClasses = computed(() =>
+  getFormClasses(
+    props.field.gridColumns ?? '12',
+    props.field.gap ?? '4',
+  ),
 )
 
 const emit = defineEmits<{

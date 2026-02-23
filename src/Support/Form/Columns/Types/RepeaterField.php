@@ -32,6 +32,10 @@ class RepeaterField extends Column
 
     protected Closure|string|null $addLabel = null;
 
+    protected bool $collapsible = true;
+
+    protected bool $defaultOpen = true;
+
     public function reorderable(bool $value = true): static
     {
         $this->reorderable = $value;
@@ -80,6 +84,30 @@ class RepeaterField extends Column
         return $this->addLabel !== null ? (string) $this->evaluate($this->addLabel) : null;
     }
 
+    public function collapsible(bool $value = true): static
+    {
+        $this->collapsible = $value;
+
+        return $this;
+    }
+
+    public function defaultOpen(bool $value = true): static
+    {
+        $this->defaultOpen = $value;
+
+        return $this;
+    }
+
+    public function getCollapsible(): bool
+    {
+        return $this->collapsible;
+    }
+
+    public function getDefaultOpen(): bool
+    {
+        return $this->defaultOpen;
+    }
+
     protected function getType(): string
     {
         return 'repeater';
@@ -119,15 +147,25 @@ class RepeaterField extends Column
         $children = $this->getColumns($model, $request);
         $children = is_array($children) ? $children : [];
 
-        return array_merge(parent::toArray($model, $request), [
+        $arr = array_merge(parent::toArray($model, $request), [
             'type' => 'repeater',
             'reorderable' => $this->reorderable,
             'minItems' => $this->minItems,
             'maxItems' => $this->maxItems,
             'addLabel' => $this->getAddLabel(),
+            'collapsible' => $this->collapsible,
+            'defaultOpen' => $this->defaultOpen,
             'fields' => array_map(function (AbstractColumn $col) use ($model, $request) {
                 return $col->toArray($model, $request);
             }, $children),
         ]);
+        if ($this->getGridColumns() !== null) {
+            $arr['gridColumns'] = $this->getGridColumns();
+        }
+        if ($this->getGap() !== null) {
+            $arr['gap'] = $this->getGap();
+        }
+
+        return $arr;
     }
 }
