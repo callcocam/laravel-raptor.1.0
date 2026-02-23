@@ -103,6 +103,7 @@ export interface FormSection {
   statePath?: string | null
   collapsible?: boolean
   defaultOpen?: boolean
+  columnSpan?: string | null
   fields: FormField[]
 }
 

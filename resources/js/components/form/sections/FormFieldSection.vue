@@ -28,7 +28,7 @@
               v-for="innerField in section.fields"
               :key="getFieldValueKey(section, innerField)"
               :class="getColumnClasses(innerField)"
-              :style="getColumnStyles(innerField)"
+              :style="(getColumnStyles(innerField) as Record<string, string | number>)"
               class="space-y-2"
             >
               <FieldRenderer
@@ -51,7 +51,7 @@
             v-for="innerField in section.fields"
             :key="getFieldValueKey(section, innerField)"
             :class="getColumnClasses(innerField)"
-            :style="getColumnStyles(innerField)"
+            :style="(getColumnStyles(innerField) as Record<string, string | number>)"
             class="space-y-2"
           >
             <FieldRenderer
@@ -80,6 +80,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { useGridLayout } from '@raptor/composables/useGridLayout'
 import FieldRenderer from '@raptor/components/form/FieldRenderer.vue'
 import type { FormSection, FormField } from '@raptor/types'
 
@@ -89,29 +90,34 @@ const props = defineProps<{
 
 const section = props.field
 
+const { getFormClasses } = useGridLayout()
 const formClassesInjected = inject<{ value: string } | string>('formClasses', '')
-const formClasses = computed(() =>
-  typeof formClassesInjected === 'object' && formClassesInjected && 'value' in formClassesInjected
-    ? formClassesInjected.value
-    : String(formClassesInjected ?? ''),
-)
+const formClasses = computed(() => {
+  const raw =
+    typeof formClassesInjected === 'object' &&
+    formClassesInjected &&
+    'value' in formClassesInjected
+      ? formClassesInjected.value
+      : String(formClassesInjected ?? '')
+  return (raw && String(raw).trim()) ? raw : getFormClasses('12', '4')
+})
 const getColumnClasses = inject<(col: FormField) => string>(
   'getColumnClasses',
-  () => () => '',
+  (col: FormField) => '',
 )
 const getColumnStyles = inject<(col: FormField) => Record<string, unknown>>(
   'getColumnStyles',
-  () => () => ({}),
+  (col: FormField) => ({}),
 )
 const getFieldValueKey = inject<(section: FormSection, field: FormField) => string>(
   'getFieldValueKey',
-  () => () => '',
+  (section: FormSection, field: FormField) => '',
 )
 const getFieldValue = inject<(section: FormSection, field: FormField) => unknown>(
   'getFieldValue',
-  () => () => undefined,
+  (section: FormSection, field: FormField) => undefined,
 )
 const setFieldValue = inject<
   (section: FormSection, field: FormField, value: unknown) => void
->('setFieldValue', () => () => {})
+>('setFieldValue', (section: FormSection, field: FormField, value: unknown) => {})
 </script>

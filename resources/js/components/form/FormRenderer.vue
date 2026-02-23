@@ -4,7 +4,7 @@
             <div
                 v-for="(item, index) in fields"
                 :key="fieldKey(item, index)"
-                :class="isSection(item) ? '' : getColumnClasses(item)"
+                :class="isSection(item) ? getColumnClasses({ name: '', columnSpan: (item as FormSection).columnSpan ?? 'full' }) : getColumnClasses(item)"
                 :style="isSection(item) ? {} : getColumnStyles(item)"
                 class="space-y-2"
             >
@@ -116,6 +116,7 @@ function getModelValue(item: FormFieldOrSection): unknown {
 
 function setModelValue(item: FormFieldOrSection, value: unknown): void {
     if (isSection(item)) return;
+    console.log('setModelValue', item, value);
     formData[(item as FormField).name] = value;
 }
 
