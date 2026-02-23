@@ -67,15 +67,38 @@
                 />
               </div>
             </div>
-            <button
-              v-if="canRemove"
-              type="button"
-              class="shrink-0 rounded p-1 text-destructive hover:bg-destructive/10"
-              aria-label="Remover item"
-              @click="removeRow(index)"
-            >
-              <Trash2 class="h-4 w-4" />
-            </button>
+            <div class="flex shrink-0 items-center gap-0.5">
+              <template v-for="itemAction in (field.itemActions ?? [])" :key="itemAction.name">
+                <button
+                  v-if="!itemAction.disabled"
+                  type="button"
+                  class="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+                  :aria-label="itemAction.label"
+                  :title="(itemAction.tooltip as string) ?? itemAction.label"
+                  @click="runItemAction(itemAction, index, row)"
+                >
+                  <DynamicIcon v-if="itemAction.icon" :name="itemAction.icon" class="h-4 w-4" />
+                  <span v-else class="text-xs">{{ itemAction.label }}</span>
+                </button>
+              </template>
+              <button
+                type="button"
+                class="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+                aria-label="Copiar item"
+                @click="copyRow(index)"
+              >
+                <Copy class="h-4 w-4" />
+              </button>
+              <button
+                v-if="canRemove"
+                type="button"
+                class="rounded p-1 text-destructive hover:bg-destructive/10"
+                aria-label="Remover item"
+                @click="removeRow(index)"
+              >
+                <Trash2 class="h-4 w-4" />
+              </button>
+            </div>
           </div>
         </div>
         <div v-if="canAdd" class="flex w-full justify-center">
@@ -140,15 +163,38 @@
             />
           </div>
         </div>
-        <button
-          v-if="canRemove"
-          type="button"
-          class="shrink-0 rounded p-1 text-destructive hover:bg-destructive/10"
-          aria-label="Remover item"
-          @click="removeRow(index)"
-        >
-          <Trash2 class="h-4 w-4" />
-        </button>
+        <div class="flex shrink-0 items-center gap-0.5">
+          <template v-for="itemAction in (field.itemActions ?? [])" :key="itemAction.name">
+            <button
+              v-if="!itemAction.disabled"
+              type="button"
+              class="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+              :aria-label="itemAction.label"
+              :title="(itemAction.tooltip as string) ?? itemAction.label"
+              @click="runItemAction(itemAction, index, row)"
+            >
+              <DynamicIcon v-if="itemAction.icon" :name="itemAction.icon" class="h-4 w-4" />
+              <span v-else class="text-xs">{{ itemAction.label }}</span>
+            </button>
+          </template>
+          <button
+            type="button"
+            class="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+            aria-label="Copiar item"
+            @click="copyRow(index)"
+          >
+            <Copy class="h-4 w-4" />
+          </button>
+          <button
+            v-if="canRemove"
+            type="button"
+            class="rounded p-1 text-destructive hover:bg-destructive/10"
+            aria-label="Remover item"
+            @click="removeRow(index)"
+          >
+            <Trash2 class="h-4 w-4" />
+          </button>
+        </div>
       </div>
     </div>
     <div v-if="canAdd" class="flex w-full justify-center">
@@ -166,16 +212,18 @@
 
 <script lang="ts" setup>
 import { computed } from 'vue'
-import { ChevronUp, ChevronDown, Plus, Trash2 } from 'lucide-vue-next'
+import { ChevronUp, ChevronDown, Plus, Trash2, Copy } from 'lucide-vue-next'
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible'
+import { router } from '@inertiajs/vue3'
+import DynamicIcon from '@raptor/components/ui/DynamicIcon.vue'
 import FieldRenderer from '@raptor/components/form/FieldRenderer.vue'
 import { useFormField } from '@raptor/composables/useFormField'
 import { useGridLayout } from '@raptor/composables/useGridLayout'
-import type { FormRepeater, FormField } from '@raptor/types'
+import type { FormRepeater, FormRepeaterItemAction, FormField } from '@raptor/types'
 
 const props = withDefaults(
   defineProps<{
@@ -240,6 +288,25 @@ function addRow(): void {
     empty[f.name] = null
   }
   emitChange([...items.value, empty])
+}
+
+function copyRow(index: number): void {
+  if (!canAdd.value) return
+  const row = items.value[index]
+  const copy = JSON.parse(JSON.stringify(row)) as Record<string, unknown>
+  const next = [...items.value]
+  next.splice(index + 1, 0, copy)
+  emitChange(next)
+}
+
+function runItemAction(
+  action: FormRepeaterItemAction,
+  index: number,
+  row: Record<string, unknown>,
+): void {
+  const url = action.executeUrl
+  if (!url) return
+  router.post(url, { index, item: row })
 }
 
 function removeRow(index: number): void {

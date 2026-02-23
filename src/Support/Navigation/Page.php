@@ -304,6 +304,7 @@ class Page
             }
 
             Route::post('/{id}/action/{actionName}', [$controller, 'executeAction'])->name('execute-action');
+            Route::post('/{id}/repeater-action/{repeaterName}/{actionName}', [$controller, 'executeRepeaterItemAction'])->name('execute-repeater-item-action');
             Route::post('/bulk-action/{actionName}', [$controller, 'executeBulkAction'])->name('execute-bulk-action');
             Route::post('/{id}/update-field', [$controller, 'updateField'])->name('update-field');
         });

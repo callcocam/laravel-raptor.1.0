@@ -8,6 +8,8 @@
 
 namespace Callcocam\LaravelRaptor\Support\Form\Columns\Types;
 
+use Callcocam\LaravelRaptor\Support\Actions\AbstractAction;
+use Callcocam\LaravelRaptor\Support\Actions\Types\RepeaterItemCallbackAction;
 use Callcocam\LaravelRaptor\Support\AbstractColumn;
 use Callcocam\LaravelRaptor\Support\Concerns\Interacts\WithColumns;
 use Callcocam\LaravelRaptor\Support\Form\Columns\Column;
@@ -35,6 +37,9 @@ class RepeaterField extends Column
     protected bool $collapsible = true;
 
     protected bool $defaultOpen = true;
+
+    /** @var Closure|array<int, AbstractAction> */
+    protected Closure|array $itemActions = [];
 
     public function reorderable(bool $value = true): static
     {
@@ -108,6 +113,31 @@ class RepeaterField extends Column
         return $this->defaultOpen;
     }
 
+    /**
+     * Actions por item do repeater (ex.: RepeaterItemCallbackAction com executeUsing).
+     *
+     * @param  Closure|array<int, AbstractAction>  $actions
+     */
+    public function itemActions(Closure|array $actions): static
+    {
+        $this->itemActions = $actions;
+
+        return $this;
+    }
+
+    /**
+     * @return array<int, AbstractAction>
+     */
+    public function getItemActions(?Model $model = null, ?Request $request = null): array
+    {
+        $resolved = $this->evaluate($this->itemActions, [
+            'model' => $model,
+            'request' => $request,
+        ]);
+
+        return is_array($resolved) ? array_values($resolved) : [];
+    }
+
     protected function getType(): string
     {
         return 'repeater';
@@ -164,6 +194,16 @@ class RepeaterField extends Column
         }
         if ($this->getGap() !== null) {
             $arr['gap'] = $this->getGap();
+        }
+
+        $itemActions = [];
+        foreach ($this->getItemActions($model, $request) as $action) {
+            if ($action instanceof RepeaterItemCallbackAction) {
+                $itemActions[] = $action->renderForRepeaterItem($this->getName(), $model, $request);
+            }
+        }
+        if ($itemActions !== []) {
+            $arr['itemActions'] = $itemActions;
         }
 
         return $arr;

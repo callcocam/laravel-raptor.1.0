@@ -16,6 +16,7 @@ use Callcocam\LaravelRaptor\Support\Concerns\Interacts\WithColumns;
 use Callcocam\LaravelRaptor\Support\Concerns\Interacts\WithFooterActions;
 use Callcocam\LaravelRaptor\Support\Concerns\Interacts\WithHeaderActions;
 use Callcocam\LaravelRaptor\Support\Concerns\Shared\BelongToRequest;
+use Callcocam\LaravelRaptor\Support\Form\Columns\Types\RepeaterField;
 use Callcocam\LaravelRaptor\Support\Form\Columns\Types\SectionField;
 use Closure;
 use Illuminate\Database\Eloquent\Model;
@@ -140,7 +141,7 @@ class FormBuilder
     }
 
     /**
-     * @return array<int, AbstractColumn|SectionField>
+     * @return array<int, AbstractColumn|SectionField|RepeaterField>
      */
     protected function getResolvedFields(): array
     {
@@ -150,6 +151,20 @@ class FormBuilder
         }
 
         return array_values($evaluated);
+    }
+
+    /**
+     * Retorna o RepeaterField pelo nome, ou null se não existir.
+     */
+    public function getRepeaterField(string $name): ?RepeaterField
+    {
+        foreach ($this->getResolvedFields() as $column) {
+            if ($column instanceof RepeaterField && $column->getName() === $name) {
+                return $column;
+            }
+        }
+
+        return null;
     }
 
     /**

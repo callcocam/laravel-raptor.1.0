@@ -96,6 +96,20 @@ export interface FormRepeater {
   gap?: string | null
   collapsible?: boolean
   defaultOpen?: boolean
+  /** Actions por item (ex.: callback no backend). Cada action pode ter executeUrl. */
+  itemActions?: FormRepeaterItemAction[]
+  [key: string]: unknown
+}
+
+export interface FormRepeaterItemAction {
+  name: string
+  label: string
+  type?: string
+  icon?: string | null
+  executeUrl?: string | null
+  variant?: string | null
+  tooltip?: string | null
+  disabled?: boolean
   [key: string]: unknown
 }
 

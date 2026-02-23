@@ -10,6 +10,7 @@ namespace Callcocam\LaravelRaptor\Http\Controllers;
 
 use Callcocam\LaravelRaptor\Http\Concerns\HandlesEditableColumns;
 use Callcocam\LaravelRaptor\Support\Actions\Types\CallbackAction;
+use Callcocam\LaravelRaptor\Support\Actions\Types\RepeaterItemCallbackAction;
 use Callcocam\LaravelRaptor\Support\Form\FormBuilder;
 use Callcocam\LaravelRaptor\Support\Info\InfoBuilder;
 use Callcocam\LaravelRaptor\Support\Navigation\Page;
@@ -335,6 +336,43 @@ class AbstractController extends BaseController
         }
 
         return $this->handleActionResult($action->execute($model, $request));
+    }
+
+    /**
+     * Executa uma action de item do repeater.
+     * Rota: POST {resource}/{id}/repeater-action/{repeaterName}/{actionName}
+     * Body: { index: int, item: array }
+     */
+    public function executeRepeaterItemAction(Request $request, string $id, string $repeaterName, string $actionName): mixed
+    {
+        $model = $this->getModel()->findOrFail($id);
+        $this->authorizeRoute('edit', $model);
+
+        $form = $this->form($this->getFormBuilder($request, $model));
+        $repeater = $form->getRepeaterField($repeaterName);
+
+        if ($repeater === null) {
+            abort(404, "Repeater [{$repeaterName}] not found.");
+        }
+
+        $action = collect($repeater->getItemActions($model, $request))
+            ->first(fn($a) => $a->getName() === $actionName);
+
+        if ($action === null) {
+            abort(404, "Repeater item action [{$actionName}] not found.");
+        }
+
+        if (! $action instanceof RepeaterItemCallbackAction) {
+            abort(400, "Repeater item action [{$actionName}] is not executable.");
+        }
+
+        $itemIndex = (int) $request->input('index', 0);
+        $itemData = $request->input('item', []);
+        $itemData = is_array($itemData) ? $itemData : [];
+
+        return $this->handleActionResult(
+            $action->execute($request, $model, $repeaterName, $itemIndex, $itemData),
+        );
     }
 
     /**
