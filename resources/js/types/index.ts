@@ -98,7 +98,22 @@ export interface FormRepeater {
   defaultOpen?: boolean
   /** Actions por item (ex.: callback no backend). Cada action pode ter executeUrl. */
   itemActions?: FormRepeaterItemAction[]
+  /** Cálculos por linha: fórmula → targetField */
+  rowCalculations?: FormRepeaterRowCalculation[]
+  /** Cálculos verticais: agregar coluna → targetField do form */
+  summaryCalculations?: FormRepeaterSummaryCalculation[]
   [key: string]: unknown
+}
+
+export interface FormRepeaterRowCalculation {
+  targetField: string
+  formula: string
+}
+
+export interface FormRepeaterSummaryCalculation {
+  sourceField: string
+  operation: 'sum' | 'avg' | 'count'
+  targetField: string
 }
 
 export interface FormRepeaterItemAction {

@@ -211,7 +211,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, inject, onMounted, watch } from 'vue'
 import { ChevronUp, ChevronDown, Plus, Trash2, Copy } from 'lucide-vue-next'
 import {
   Collapsible,
@@ -223,7 +223,14 @@ import DynamicIcon from '@raptor/components/ui/DynamicIcon.vue'
 import FieldRenderer from '@raptor/components/form/FieldRenderer.vue'
 import { useFormField } from '@raptor/composables/useFormField'
 import { useGridLayout } from '@raptor/composables/useGridLayout'
-import type { FormRepeater, FormRepeaterItemAction, FormField } from '@raptor/types'
+import { evaluateRepeaterFormula } from '@raptor/utils/evaluateRepeaterFormula'
+import type {
+  FormRepeater,
+  FormRepeaterItemAction,
+  FormRepeaterRowCalculation,
+  FormRepeaterSummaryCalculation,
+  FormField,
+} from '@raptor/types'
 
 const props = withDefaults(
   defineProps<{
@@ -246,6 +253,11 @@ const emit = defineEmits<{
 }>()
 
 const { emitChange } = useFormField(emit)
+
+const setRepeaterSummary = inject<(fieldName: string, value: unknown) => void>(
+  'setRepeaterSummary',
+  () => {},
+)
 
 const items = computed<Record<string, unknown>[]>(() => {
   const v = props.modelValue
@@ -274,11 +286,45 @@ function getRowValue(row: Record<string, unknown>, innerField: FormField): unkno
   return row[innerField.name]
 }
 
+function applyRowCalculations(row: Record<string, unknown>): Record<string, unknown> {
+  const calcs = props.field.rowCalculations ?? []
+  if (calcs.length === 0) return { ...row }
+  const out = { ...row }
+  for (const calc of calcs as FormRepeaterRowCalculation[]) {
+    const value = evaluateRepeaterFormula(calc.formula, out)
+    out[calc.targetField] = value
+  }
+  return out
+}
+
+function runSummaryCalculations(itemsList: Record<string, unknown>[]): void {
+  const summaries = props.field.summaryCalculations ?? []
+  for (const s of summaries as FormRepeaterSummaryCalculation[]) {
+    const values = itemsList.map((row) => {
+      const v = row[s.sourceField]
+      if (v === null || v === undefined || v === '') return 0
+      const n = Number(v)
+      return Number.isNaN(n) ? 0 : n
+    })
+    let result: number
+    if (s.operation === 'sum') result = values.reduce((a, b) => a + b, 0)
+    else if (s.operation === 'avg') result = values.length ? values.reduce((a, b) => a + b, 0) / values.length : 0
+    else result = values.length
+    setRepeaterSummary(s.targetField, result)
+  }
+}
+
+function emitWithCalculations(next: Record<string, unknown>[]): void {
+  const withRowCalcs = next.map((row) => applyRowCalculations(row))
+  emitChange(withRowCalcs)
+  runSummaryCalculations(withRowCalcs)
+}
+
 function setRowValue(rowIndex: number, innerField: FormField, value: unknown): void {
   const next = items.value.map((row, i) =>
     i === rowIndex ? { ...row, [innerField.name]: value } : row,
   )
-  emitChange(next)
+  emitWithCalculations(next)
 }
 
 function addRow(): void {
@@ -287,7 +333,7 @@ function addRow(): void {
   for (const f of props.field.fields) {
     empty[f.name] = null
   }
-  emitChange([...items.value, empty])
+  emitWithCalculations([...items.value, empty])
 }
 
 function copyRow(index: number): void {
@@ -296,7 +342,7 @@ function copyRow(index: number): void {
   const copy = JSON.parse(JSON.stringify(row)) as Record<string, unknown>
   const next = [...items.value]
   next.splice(index + 1, 0, copy)
-  emitChange(next)
+  emitWithCalculations(next)
 }
 
 function runItemAction(
@@ -312,20 +358,39 @@ function runItemAction(
 function removeRow(index: number): void {
   if (!canRemove.value) return
   const next = items.value.filter((_, i) => i !== index)
-  emitChange(next)
+  emitWithCalculations(next)
 }
 
 function moveUp(index: number): void {
   if (index <= 0) return
   const next = [...items.value]
   ;[next[index - 1], next[index]] = [next[index], next[index - 1]]
-  emitChange(next)
+  emitWithCalculations(next)
 }
 
 function moveDown(index: number): void {
   if (index >= items.value.length - 1) return
   const next = [...items.value]
   ;[next[index], next[index + 1]] = [next[index + 1], next[index]]
-  emitChange(next)
+  emitWithCalculations(next)
 }
+
+watch(
+  items,
+  (list) => {
+    if ((props.field.summaryCalculations?.length ?? 0) > 0) {
+      runSummaryCalculations(list)
+    }
+  },
+  { immediate: true, deep: true },
+)
+
+onMounted(() => {
+  if (
+    (props.field.rowCalculations?.length ?? 0) > 0 &&
+    items.value.length > 0
+  ) {
+    emitWithCalculations(items.value)
+  }
+})
 </script>

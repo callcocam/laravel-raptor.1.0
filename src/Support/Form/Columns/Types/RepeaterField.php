@@ -13,6 +13,8 @@ use Callcocam\LaravelRaptor\Support\Actions\Types\RepeaterItemCallbackAction;
 use Callcocam\LaravelRaptor\Support\AbstractColumn;
 use Callcocam\LaravelRaptor\Support\Concerns\Interacts\WithColumns;
 use Callcocam\LaravelRaptor\Support\Form\Columns\Column;
+use Callcocam\LaravelRaptor\Support\Form\Repeater\RepeaterRowCalculation;
+use Callcocam\LaravelRaptor\Support\Form\Repeater\RepeaterSummaryCalculation;
 use Closure;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -40,6 +42,12 @@ class RepeaterField extends Column
 
     /** @var Closure|array<int, AbstractAction> */
     protected Closure|array $itemActions = [];
+
+    /** @var Closure|array<int, RepeaterRowCalculation> */
+    protected Closure|array $rowCalculations = [];
+
+    /** @var Closure|array<int, RepeaterSummaryCalculation> */
+    protected Closure|array $summaryCalculations = [];
 
     public function reorderable(bool $value = true): static
     {
@@ -138,6 +146,50 @@ class RepeaterField extends Column
         return is_array($resolved) ? array_values($resolved) : [];
     }
 
+    /**
+     * Cálculos por linha (ex.: total = quantidade * unitário - desconto).
+     *
+     * @param  Closure|array<int, RepeaterRowCalculation>  $calculations
+     */
+    public function rowCalculations(Closure|array $calculations): static
+    {
+        $this->rowCalculations = $calculations;
+
+        return $this;
+    }
+
+    /**
+     * @return array<int, RepeaterRowCalculation>
+     */
+    public function getRowCalculations(): array
+    {
+        $resolved = $this->evaluate($this->rowCalculations);
+
+        return is_array($resolved) ? array_values($resolved) : [];
+    }
+
+    /**
+     * Cálculos verticais (coluna): soma/média de um campo → campo do form que recebe o resultado.
+     *
+     * @param  Closure|array<int, RepeaterSummaryCalculation>  $calculations
+     */
+    public function summaryCalculations(Closure|array $calculations): static
+    {
+        $this->summaryCalculations = $calculations;
+
+        return $this;
+    }
+
+    /**
+     * @return array<int, RepeaterSummaryCalculation>
+     */
+    public function getSummaryCalculations(): array
+    {
+        $resolved = $this->evaluate($this->summaryCalculations);
+
+        return is_array($resolved) ? array_values($resolved) : [];
+    }
+
     protected function getType(): string
     {
         return 'repeater';
@@ -204,6 +256,16 @@ class RepeaterField extends Column
         }
         if ($itemActions !== []) {
             $arr['itemActions'] = $itemActions;
+        }
+
+        $rowCalcs = array_map(fn (RepeaterRowCalculation $c) => $c->toArray(), $this->getRowCalculations());
+        if ($rowCalcs !== []) {
+            $arr['rowCalculations'] = $rowCalcs;
+        }
+
+        $summaryCalcs = array_map(fn (RepeaterSummaryCalculation $c) => $c->toArray(), $this->getSummaryCalculations());
+        if ($summaryCalcs !== []) {
+            $arr['summaryCalculations'] = $summaryCalcs;
         }
 
         return $arr;

@@ -108,6 +108,12 @@ provide('getColumnStyles', getColumnStyles);
 provide('getFieldValueKey', getFieldValueKey);
 provide('getFieldValue', getFieldValue);
 provide('setFieldValue', setFieldValue);
+provide(
+    'setRepeaterSummary',
+    (fieldName: string, value: unknown) => {
+        formData[fieldName] = value;
+    },
+);
 
 function getModelValue(item: FormFieldOrSection): unknown {
     if (isSection(item)) return undefined;
@@ -118,6 +124,7 @@ function setModelValue(item: FormFieldOrSection, value: unknown): void {
     if (isSection(item)) return;
     formData[(item as FormField).name] = value;
 }
+
 
 function onFooterActionClick(action: FormActionPayload, event: Event) {
     if (action.type === 'submit') {
