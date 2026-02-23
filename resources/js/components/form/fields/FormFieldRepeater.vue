@@ -223,7 +223,10 @@ import DynamicIcon from '@raptor/components/ui/DynamicIcon.vue'
 import FieldRenderer from '@raptor/components/form/FieldRenderer.vue'
 import { useFormField } from '@raptor/composables/useFormField'
 import { useGridLayout } from '@raptor/composables/useGridLayout'
-import { evaluateRepeaterFormula } from '@raptor/utils/evaluateRepeaterFormula'
+import {
+  evaluateRepeaterFormula,
+  parseNumberFromField,
+} from '@raptor/utils/evaluateRepeaterFormula'
 import type {
   FormRepeater,
   FormRepeaterItemAction,
@@ -300,12 +303,7 @@ function applyRowCalculations(row: Record<string, unknown>): Record<string, unkn
 function runSummaryCalculations(itemsList: Record<string, unknown>[]): void {
   const summaries = props.field.summaryCalculations ?? []
   for (const s of summaries as FormRepeaterSummaryCalculation[]) {
-    const values = itemsList.map((row) => {
-      const v = row[s.sourceField]
-      if (v === null || v === undefined || v === '') return 0
-      const n = Number(v)
-      return Number.isNaN(n) ? 0 : n
-    })
+    const values = itemsList.map((row) => parseNumberFromField(row[s.sourceField]))
     let result: number
     if (s.operation === 'sum') result = values.reduce((a, b) => a + b, 0)
     else if (s.operation === 'avg') result = values.length ? values.reduce((a, b) => a + b, 0) / values.length : 0

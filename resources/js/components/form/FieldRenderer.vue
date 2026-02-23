@@ -38,6 +38,20 @@ const resolvedComponent = computed<Component | null>(() => {
       null
     )
   }
+  if (f.type === 'money') {
+    return (
+      ComponentRegistry.get(f.component ?? 'form-field-money') ??
+      ComponentRegistry.get('form-field-money') ??
+      null
+    )
+  }
+  if (f.type === 'mask') {
+    return (
+      ComponentRegistry.get(f.component ?? 'form-field-mask') ??
+      ComponentRegistry.get('form-field-mask') ??
+      null
+    )
+  }
   const name = f.component ?? 'form-field-text'
   return (
     ComponentRegistry.get(name) ??
