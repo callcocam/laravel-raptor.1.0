@@ -52,6 +52,20 @@ const resolvedComponent = computed<Component | null>(() => {
       null
     )
   }
+  if (f.type === 'busca-cep') {
+    return (
+      ComponentRegistry.get(f.component ?? 'form-field-busca-cep') ??
+      ComponentRegistry.get('form-field-busca-cep') ??
+      null
+    )
+  }
+  if (f.type === 'password') {
+    return (
+      ComponentRegistry.get(f.component ?? 'form-field-password') ??
+      ComponentRegistry.get('form-field-password') ??
+      null
+    )
+  }
   const name = f.component ?? 'form-field-text'
   return (
     ComponentRegistry.get(name) ??
