@@ -6,10 +6,17 @@
     >
       {{ field.label }}
     </Label>
+    <!-- Modo busca ao digitar: combobox com popover -->
     <template v-if="isSearchMode">
       <Popover v-model:open="popoverOpen">
         <PopoverAnchor as-child>
-          <div class="relative">
+          <div
+            class="relative cursor-text"
+            role="combobox"
+            :aria-expanded="popoverOpen"
+            :aria-controls="`${field.name}-listbox`"
+            @click="onTriggerClick"
+          >
             <Input
               :id="field.name"
               ref="inputRef"
@@ -17,12 +24,9 @@
               class="w-full pr-8"
               :placeholder="(field.placeholder as string) ?? 'Digite para buscar...'"
               autocomplete="off"
-              role="combobox"
-              :aria-expanded="popoverOpen"
-              :aria-controls="`${field.name}-listbox`"
-              :aria-activedescendant="activeId"
               aria-autocomplete="list"
-              @update:model-value="(v: string | number) => onSearchInput(v)"
+              :aria-activedescendant="activeId"
+              readonly
               @focus="popoverOpen = true"
               @keydown.down.prevent="focusNext"
               @keydown.up.prevent="focusPrev"
@@ -31,7 +35,7 @@
             />
             <span
               v-if="isLoading"
-              class="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+              class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
               aria-hidden
             >
               <svg
@@ -66,6 +70,19 @@
           @keydown.up.prevent="focusPrev"
           @keydown.enter.prevent="selectFocused"
         >
+          <div class="border-b p-2">
+            <input
+              ref="searchInputRef"
+              v-model="searchQuery"
+              type="text"
+              class="border-input bg-background h-9 w-full rounded-md border px-3 py-1 text-sm outline-none"
+              placeholder="Digite para filtrar..."
+              autocomplete="off"
+              @keydown.down.prevent="focusNext"
+              @keydown.up.prevent="focusPrev"
+              @keydown.enter.prevent="selectFocused"
+            />
+          </div>
           <ul
             v-if="searchOptions.length > 0"
             class="max-h-60 overflow-auto py-1"
@@ -98,11 +115,12 @@
             v-else-if="searchQuery.length === 0"
             class="px-3 py-4 text-center text-sm text-muted-foreground"
           >
-            Digite para buscar.
+            Digite acima para buscar.
           </p>
         </PopoverContent>
       </Popover>
     </template>
+    <!-- Modo nativo: select estático com field.options (sem busca) -->
     <template v-else>
       <Select
         :model-value="String(modelValue ?? '')"
@@ -126,7 +144,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import { usePage } from '@inertiajs/vue3'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
@@ -161,6 +179,7 @@ const isLoading = ref(false)
 const popoverOpen = ref(false)
 const focusedIndex = ref(0)
 const inputRef = ref<InstanceType<typeof Input> | null>(null)
+const searchInputRef = ref<HTMLInputElement | null>(null)
 
 const activeId = computed(() => {
   const opt = searchOptions.value[focusedIndex.value]
@@ -238,14 +257,11 @@ async function fetchOptions(q: string) {
   }
 }
 
-function onSearchInput(value: string | number) {
-  const q = String(value)
-  searchQuery.value = q
-  if (debounceTimer) clearTimeout(debounceTimer)
-  debounceTimer = setTimeout(() => {
-    fetchOptions(q)
-    debounceTimer = null
-  }, DEBOUNCE_MS)
+function onTriggerClick() {
+  popoverOpen.value = true
+  nextTick(() => {
+    searchInputRef.value?.focus()
+  })
 }
 
 function selectOption(opt: { value: string | number; label: string }) {
@@ -292,4 +308,13 @@ watch(
   },
   { immediate: true },
 )
+
+watch(searchQuery, (q) => {
+  if (!isSearchMode.value || !popoverOpen.value) return
+  if (debounceTimer) clearTimeout(debounceTimer)
+  debounceTimer = setTimeout(() => {
+    fetchOptions(q)
+    debounceTimer = null
+  }, DEBOUNCE_MS)
+})
 </script>
