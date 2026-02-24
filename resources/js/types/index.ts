@@ -79,6 +79,8 @@ export interface FormField {
   placeholder?: string | null
   inputType?: string
   options?: Array<{ label: string; value: string | number }>
+  /** URL para buscar opções ao digitar (POST com q, id?). Quando definido, o select usa modo combobox. */
+  searchExecuteUrl?: string
   rows?: number
   [key: string]: unknown
 }

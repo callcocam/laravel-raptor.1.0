@@ -168,6 +168,29 @@ class FormBuilder
     }
 
     /**
+     * Retorna um campo do form pelo nome (top-level ou dentro de seção).
+     */
+    public function getFormField(string $name): ?AbstractColumn
+    {
+        foreach ($this->getResolvedFields() as $column) {
+            if ($column instanceof SectionField) {
+                $children = $column->getColumns($this->getModel(), $this->getRequest());
+                if (is_array($children)) {
+                    foreach ($children as $child) {
+                        if ($child->getName() === $name) {
+                            return $child;
+                        }
+                    }
+                }
+            } elseif ($column->getName() === $name) {
+                return $column;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Um único array de itens: cada item é um campo (toArray) ou uma section (toArray com type section).
      * Cada field é responsável por seu próprio toArray(); o form não trata dados aqui.
      *

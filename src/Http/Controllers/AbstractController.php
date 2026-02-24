@@ -18,6 +18,7 @@ use Callcocam\LaravelRaptor\Support\Table\TableBuilder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Gate;
@@ -414,6 +415,39 @@ class AbstractController extends BaseController
         }
 
         return $this->handleActionResult($lastResult);
+    }
+
+    /**
+     * Executa a busca de opções de um campo select com searchUsing (action callback).
+     * Rota: POST {resource}/search-field/{fieldName}
+     * Body: { q?: string, id?: int }
+     */
+    public function executeSearchField(Request $request, string $fieldName): JsonResponse
+    {
+        $id = $request->input('id');
+        $model = $id !== null && $this->getModel() !== null
+            ? $this->getModel()->find($id)
+            : null;
+
+        $form = $this->form($this->getFormBuilder($request, $model));
+        $field = $form->getFormField($fieldName);
+
+        if ($field === null) {
+            abort(404, "Form field [{$fieldName}] not found.");
+        }
+
+        if (! method_exists($field, 'getSearchCallback') || $field->getSearchCallback() === null) {
+            abort(400, "Form field [{$fieldName}] does not support search.");
+        }
+
+        $q = (string) ($request->input('q') ?? '');
+        $options = $field->evaluate($field->getSearchCallback(), [
+            'request' => $request,
+            'model' => $model,
+            'q' => $q,
+        ]);
+
+        return response()->json(is_array($options) ? $options : []);
     }
 
     /**
