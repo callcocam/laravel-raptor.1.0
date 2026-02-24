@@ -295,6 +295,10 @@ class AbstractController extends BaseController
     {
         $this->authorizeRoute('store');
 
+        // validar os campos do form
+        // $form = $this->form($this->getFormBuilder($request));
+        // $form->validate($request);
+
         $model = $this->getModel()->create($request->all());
 
         return redirect()->back()->with('success', 'Registro criado com sucesso.');

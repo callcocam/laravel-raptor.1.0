@@ -75,6 +75,7 @@ export interface FormField {
   component?: string
   type?: string
   rules?: string[] | null
+  messages?: Record<string, string>
   placeholder?: string | null
   inputType?: string
   options?: Array<{ label: string; value: string | number }>

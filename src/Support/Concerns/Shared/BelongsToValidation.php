@@ -8,24 +8,28 @@
 
 namespace Callcocam\LaravelRaptor\Support\Concerns\Shared;
 
+use Callcocam\LaravelRaptor\Support\Validation\ValidationRules;
 use Closure;
 
 trait BelongsToValidation
 {
     protected bool $required = false;
 
+    /** @var array<string, string> Mensagens customizadas por chave (ex.: attribute.rule) */
     protected array $messages = [];
+
+    /** @var array<string, string> Mensagens por regra (rule key => message), mescladas em getMessages() */
+    protected array $ruleMessages = [];
 
     /**
      * Marca o campo como obrigatório
      */
-    public function required(bool $required = true): static
+    public function required(bool $required = true, ?string $message = null): static
     {
         $this->required = $required;
 
-        // Adiciona 'required' às rules se não existir
         if ($required && ! $this->hasRule('required')) {
-            $this->addRule('required');
+            $this->addRule(ValidationRules::required(), $message);
         }
 
         return $this;
@@ -60,7 +64,7 @@ trait BelongsToValidation
     }
 
     /**
-     * Define as regras de validação do campo
+     * Define as regras de validação do campo (substitui as atuais)
      */
     public function rules(array|string|Closure $rules): static
     {
@@ -70,9 +74,9 @@ trait BelongsToValidation
     }
 
     /**
-     * Adiciona uma regra de validação
+     * Adiciona uma regra de validação com mensagem opcional (ex.: addRule('email', 'E-mail inválido'))
      */
-    public function addRule(string $rule): static
+    public function addRule(string $rule, ?string $message = null): static
     {
         if (is_string($this->rules)) {
             $this->rules .= '|'.$rule;
@@ -81,12 +85,15 @@ trait BelongsToValidation
         } else {
             $this->rules = [$rule];
         }
+        if ($message !== null) {
+            $this->ruleMessages[ValidationRules::ruleKey($rule)] = $message;
+        }
 
         return $this;
     }
 
     /**
-     * Define mensagens de validação customizadas
+     * Define mensagens de validação customizadas (chaves no formato attribute.rule)
      */
     public function messages(array $messages): static
     {
@@ -104,22 +111,124 @@ trait BelongsToValidation
     }
 
     /**
-     * Retorna as regras de validação
-     */
-    public function getRules($record = null): array|string
-    {
-        return $this->evaluate($this->rules, [
-            'record' => $record,
-            'attribute' => $this->getName(),
-        ]);
-    }
-
-    /**
-     * Retorna as mensagens de validação
+     * Retorna as mensagens de validação (prontas para o validador do Laravel)
+     *
+     * @return array<string, string>
      */
     public function getMessages(): array
     {
-        return $this->messages;
+        $attr = $this->getName();
+        $built = [];
+        foreach ($this->ruleMessages as $ruleKey => $msg) {
+            $built[$attr.'.'.$ruleKey] = $msg;
+        }
+
+        return array_merge($built, $this->messages);
+    }
+
+    // --- Atalhos (regras mais comuns) ---
+
+    public function email(?string $message = null): static
+    {
+        return $this->addRule(ValidationRules::email(), $message);
+    }
+
+    public function string(?string $message = null): static
+    {
+        return $this->addRule(ValidationRules::string(), $message);
+    }
+
+    public function min(int $value, ?string $message = null): static
+    {
+        return $this->addRule(ValidationRules::min($value), $message);
+    }
+
+    public function max(int $value, ?string $message = null): static
+    {
+        return $this->addRule(ValidationRules::max($value), $message);
+    }
+
+    public function minLength(int $value, ?string $message = null): static
+    {
+        return $this->addRule(ValidationRules::minLength($value), $message);
+    }
+
+    public function maxLength(int $value, ?string $message = null): static
+    {
+        return $this->addRule(ValidationRules::maxLength($value), $message);
+    }
+
+    public function between(int $min, int $max, ?string $message = null): static
+    {
+        return $this->addRule(ValidationRules::between($min, $max), $message);
+    }
+
+    public function same(string $field, ?string $message = null): static
+    {
+        return $this->addRule(ValidationRules::same($field), $message);
+    }
+
+    public function confirmed(?string $message = null): static
+    {
+        return $this->addRule(ValidationRules::confirmed(), $message);
+    }
+
+    public function regex(string $pattern, ?string $message = null): static
+    {
+        return $this->addRule(ValidationRules::regex($pattern), $message);
+    }
+
+    /**
+     * @param  array<int, string|int>  $values
+     */
+    public function in(array $values, ?string $message = null): static
+    {
+        return $this->addRule(ValidationRules::in($values), $message);
+    }
+
+    public function numeric(?string $message = null): static
+    {
+        return $this->addRule(ValidationRules::numeric(), $message);
+    }
+
+    public function integer(?string $message = null): static
+    {
+        return $this->addRule(ValidationRules::integer(), $message);
+    }
+
+    public function url(?string $message = null): static
+    {
+        return $this->addRule(ValidationRules::url(), $message);
+    }
+
+    public function alpha(?string $message = null): static
+    {
+        return $this->addRule(ValidationRules::alpha(), $message);
+    }
+
+    public function alphaNum(?string $message = null): static
+    {
+        return $this->addRule(ValidationRules::alphaNum(), $message);
+    }
+
+    public function date(?string $message = null): static
+    {
+        return $this->addRule(ValidationRules::date(), $message);
+    }
+
+    public function dateFormat(string $format, ?string $message = null): static
+    {
+        return $this->addRule(ValidationRules::dateFormat($format), $message);
+    }
+
+    public function boolean(?string $message = null): static
+    {
+        return $this->addRule(ValidationRules::boolean(), $message);
+    }
+
+    public function array(?string $message = null): static
+    {
+        return $this->addRule(ValidationRules::array(), $message);
     }
 
     /**

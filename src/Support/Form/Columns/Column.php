@@ -171,6 +171,10 @@ abstract class Column extends AbstractColumn
             'rules' => $this->getRules(),
             'placeholder' => $this->getPlaceholder(),
         ]);
+        $messages = $this->getMessages();
+        if ($messages !== []) {
+            $arr['messages'] = $messages;
+        }
         if ($this->getColumnSpan() !== null) {
             $arr['columnSpan'] = $this->getColumnSpan();
         }
