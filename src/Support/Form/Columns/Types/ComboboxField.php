@@ -118,13 +118,18 @@ class ComboboxField extends Column
                 return [];
             }
             $search = $request->input('q');
+            $combobox = $request->input('combobox');
             $options =  $modelClass::query()
                 ->where($this->getSearchValue(), data_get($model, $this->getName()))
-                ->where($this->getSearchField(), $this->getSearchWhere(), "%{$search}%")->limit(20)->get()->map(function (Model $model) {
-                    return ['value' => $model->{$this->getSearchValue()}, 'label' => $model->{$this->getSearchLabel()}];
-                })->toArray();
+                ->when($search, function (Builder $query) use ($search, $combobox) {
+                    if ($combobox && $combobox  == $this->getName()) {
+                        $query->orWhere($this->getSearchField(), $this->getSearchWhere(), "%{$search}%");
+                    }
+                })
+                ->limit(20)->pluck($this->getSearchLabel(), $this->getSearchValue())->toArray();
             return $options;
         });
+
         $data = array_merge(parent::toArray($model, $request), [
             'options' => $this->getOptions($model, $request),
         ]);

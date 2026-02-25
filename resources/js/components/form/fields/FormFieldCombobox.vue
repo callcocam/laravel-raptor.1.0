@@ -61,7 +61,7 @@ import {
   PopoverContent,
 } from '@/components/ui/popover'
 import type { FormField } from '@raptor/types'
-import { router } from '@inertiajs/vue3'
+import { router, usePage } from '@inertiajs/vue3'
 
 const props = defineProps<{
   field: FormField
@@ -72,8 +72,10 @@ const emit = defineEmits<{
   'update:modelValue': [value: unknown]
 }>()
 
+const page = usePage()
 const searchQuery = ref('')
-const searchOptions = ref<Array<{ value: string | number; label: string }>>([])
+/** Opções vêm do servidor; quando o form é atualizado pelo reload com ?combobox&q, props.field.options muda e a lista reage */
+const searchOptions = computed(() => (props.field.options ?? []) as Array<{ value: string | number; label: string }>)
 const isLoading = ref(false)
 const popoverOpen = ref(false)
 const focusedIndex = ref(0)
@@ -99,18 +101,22 @@ const displayValue = computed(() => {
 
 function fetchOptions(q: string) {
   isLoading.value = true
-  router.reload({
-    only: ['options'],
-    data: {
-      q: q
+  router.get(
+    page.url,
+    { combobox: props.field.name, q },
+    {
+      only: ['form.fields'],
+      preserveState: true,
+      preserveScroll: true, 
+      onSuccess: (response: any) => {
+        // props.field.options = response.form.fields[props.field.name].options
+        isLoading.value = false
+      },
+      onError: () => {
+        isLoading.value = false
+      },
     },
-    onSuccess: () => {
-      isLoading.value = false
-    },
-    onError: () => {
-      isLoading.value = false
-    }
-  })
+  )
 }
 
 function onTriggerClick() {
@@ -124,7 +130,6 @@ function onTriggerClick() {
 function selectOption(opt: { value: string | number; label: string }) {
   selectedLabelFromSearch.value = opt.label
   emit('update:modelValue', opt.value)
-  searchOptions.value = []
   popoverOpen.value = false
 }
 
@@ -165,9 +170,17 @@ watch(
 watch(searchQuery, (q) => {
   if (!popoverOpen.value) return
   if (debounceTimer) clearTimeout(debounceTimer)
+  if (q.trim().length === 0) return
   debounceTimer = setTimeout(() => {
     fetchOptions(q)
     debounceTimer = null
   }, DEBOUNCE_MS)
 })
+
+watch(
+  () => searchOptions.value.length,
+  () => {
+    focusedIndex.value = 0
+  },
+)
 </script>
