@@ -66,6 +66,12 @@ const resolvedComponent = computed<Component | null>(() => {
       null
     )
   }
+  if (f.component === 'form-field-combobox') {
+    return (
+      ComponentRegistry.get('form-field-combobox') ??
+      null
+    )
+  }
   const name = f.component ?? 'form-field-text'
   return (
     ComponentRegistry.get(name) ??

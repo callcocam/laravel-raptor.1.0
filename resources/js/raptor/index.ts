@@ -86,6 +86,7 @@ ComponentRegistry.registerBulk({
     'form-field-text': defineAsyncComponent(() => import('@raptor/components/form/fields/FormFieldText.vue')),
     'form-field-textarea': defineAsyncComponent(() => import('@raptor/components/form/fields/FormFieldTextarea.vue')),
     'form-field-select': defineAsyncComponent(() => import('@raptor/components/form/fields/FormFieldSelect.vue')),
+    'form-field-combobox': defineAsyncComponent(() => import('@raptor/components/form/fields/FormFieldCombobox.vue')),
     'form-field-repeater': defineAsyncComponent(() => import('@raptor/components/form/fields/FormFieldRepeater.vue')),
     'form-field-money': defineAsyncComponent(() => import('@raptor/components/form/fields/FormFieldMoney.vue')),
     'form-field-mask': defineAsyncComponent(() => import('@raptor/components/form/fields/FormFieldMask.vue')),

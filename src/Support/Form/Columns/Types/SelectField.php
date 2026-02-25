@@ -77,6 +77,7 @@ class SelectField extends Column
             $routeName = $request->route()->getName();
             $prefix = explode('.', $routeName)[0] ?? null;
             if ($prefix !== null && Route::has("{$prefix}.search-field")) {
+                $data['component'] = 'form-field-combobox';
                 $data['searchExecuteUrl'] = route("{$prefix}.search-field", ['fieldName' => $this->getName()]);
             }
         }
