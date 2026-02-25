@@ -10,6 +10,7 @@ namespace Callcocam\LaravelRaptor\Support\Form\Columns;
 
 use Callcocam\LaravelRaptor\Support\AbstractColumn;
 use Callcocam\LaravelRaptor\Support\Concerns\HasGridLayout;
+use Callcocam\LaravelRaptor\Support\Concerns\Shared\BelongsToOptions;
 use Callcocam\LaravelRaptor\Support\Concerns\Shared\BelongToRequest;
 use Callcocam\LaravelRaptor\Support\Concerns\Shared\BelongsToValidation;
 use Closure;
@@ -21,6 +22,7 @@ abstract class Column extends AbstractColumn
     use HasGridLayout;
     use BelongToRequest;
     use BelongsToValidation;
+    use BelongsToOptions;
     /** @var array<int, string>|string|Closure|null */
     protected array|string|Closure|null $rules = null;
 
