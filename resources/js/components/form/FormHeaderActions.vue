@@ -15,13 +15,13 @@
 <script lang="ts" setup>
 import { router } from '@inertiajs/vue3'
 import { Button } from '@/components/ui/button'
-import type { FormActionPayload } from '@raptor/types'
+import type { FormAction } from '@raptor/types'
 
 const props = defineProps<{
-  actions: FormActionPayload[]
+  actions: FormAction[]
 }>()
 
-function handleAction(action: FormActionPayload) {
+function handleAction(action: FormAction) {
   if (action.type === 'url' && action.url) {
     if (action.inertia) {
       router.visit(action.url)

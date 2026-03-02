@@ -1,6 +1,6 @@
 <template>
   <div class="space-y-2">
-    <Label v-if="field.label" :for="field.name">
+    <Label v-if="!labelRenderedByWrapper && field.label" :for="field.name">
       {{ field.label }}
     </Label>
     <Popover v-model:open="popoverOpen">
@@ -52,7 +52,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, nextTick, ref, watch } from 'vue'
+import { computed, inject, nextTick, ref, watch } from 'vue'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import {
@@ -62,6 +62,8 @@ import {
 } from '@/components/ui/popover'
 import type { FormField } from '@raptor/types'
 import { router, usePage } from '@inertiajs/vue3'
+
+const labelRenderedByWrapper = inject('fieldLabelRenderedByWrapper', false)
 
 const props = defineProps<{
   field: FormField

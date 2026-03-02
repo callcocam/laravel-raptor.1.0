@@ -13,6 +13,7 @@ use Callcocam\LaravelRaptor\Support\Concerns\HasGridLayout;
 use Callcocam\LaravelRaptor\Support\Concerns\Shared\BelongsToOptions;
 use Callcocam\LaravelRaptor\Support\Concerns\Shared\BelongToRequest;
 use Callcocam\LaravelRaptor\Support\Concerns\Shared\BelongsToValidation;
+use Callcocam\LaravelRaptor\Support\Concerns\Shared\BelongsToHelpers;
 use Closure;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -23,10 +24,10 @@ abstract class Column extends AbstractColumn
     use BelongToRequest;
     use BelongsToValidation;
     use BelongsToOptions;
+    use BelongsToHelpers;
+    
     /** @var array<int, string>|string|Closure|null */
-    protected array|string|Closure|null $rules = null;
-
-    protected Closure|string|null $placeholder = null;
+    protected array|string|Closure|null $rules = null; 
 
     protected ?Closure $valueUsing = null;
 
@@ -154,24 +155,12 @@ abstract class Column extends AbstractColumn
 
         return is_array($evaluated) ? $evaluated : null;
     }
-
-    public function placeholder(Closure|string|null $placeholder): static
-    {
-        $this->placeholder = $placeholder;
-
-        return $this;
-    }
-
-    public function getPlaceholder(): ?string
-    {
-        return $this->placeholder !== null ? (string) $this->evaluate($this->placeholder) : null;
-    }
+ 
 
     public function toArray(?Model $model = null, ?Request $request = null): array
     {
         $arr = array_merge(parent::toArray(), [
             'rules' => $this->getRules(),
-            'placeholder' => $this->getPlaceholder(),
         ]);
         $messages = $this->getMessages();
         if ($messages !== []) {
@@ -187,7 +176,15 @@ abstract class Column extends AbstractColumn
         if (isset($gridConfig['order'])) {
             $arr['order'] = $gridConfig['order'];
         }
+        $arr['helpText'] = $this->getHelpText();
+        $arr['hint'] = $this->getHint();
+        $arr['prepend'] = $this->getPrepend();
+        $arr['append'] = $this->getAppend();
+        $arr['prefix'] = $this->getPrefix();
+        $arr['suffix'] = $this->getSuffix();
+        $arr['placeholder'] = $this->getPlaceholder();
 
+        
         return $arr;
     }
 

@@ -26,10 +26,10 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 import ComponentRegistry from '@raptor/utils/ComponentRegistry'
-import type { TableAction } from '@raptor/types'
+import type { TableAction, FormAction } from '@raptor/types'
 
 const props = defineProps<{
-  action: TableAction
+  action: TableAction | FormAction
   record?: Record<string, unknown>
   column?: Record<string, unknown>
 }>() 

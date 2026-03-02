@@ -1,14 +1,8 @@
 <template>
   <div class="space-y-2">
-    <Label
-      v-if="field.label"
-      :for="field.name"
-    >
-      {{ field.label }}
-    </Label>
     <Input
       :id="field.name"
-      :model-value="modelValue ?? ''"
+      :model-value="typeof modelValue === 'string' || typeof modelValue === 'number' ? modelValue : ''"
       :type="(field.inputType as string) ?? 'text'"
       :placeholder="(field.placeholder as string) ?? undefined"
       class="w-full"
@@ -19,7 +13,6 @@
 
 <script lang="ts" setup>
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import type { FormField } from '@raptor/types'
 
 defineProps<{

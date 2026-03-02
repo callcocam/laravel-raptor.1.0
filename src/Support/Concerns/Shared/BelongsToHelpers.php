@@ -9,6 +9,7 @@
 namespace Callcocam\LaravelRaptor\Support\Concerns\Shared;
 
 use Callcocam\LaravelRaptor\Support\AbstractColumn;
+use Callcocam\LaravelRaptor\Support\Actions\AbstractAction;
 use Closure;
 
 trait BelongsToHelpers
@@ -17,15 +18,13 @@ trait BelongsToHelpers
 
     protected string|Closure|null $helpText = null;
 
-    protected string|array|Closure|AbstractColumn|null $hint = null;
+    protected string|array|Closure|AbstractColumn|AbstractAction|null $hint = null;
 
-    protected string|array|Closure|null $prepend = null;
+    /** Prepend/prefix: conteúdo ou action antes do campo (prepend é atalho de prefix). */
+    protected string|array|Closure|AbstractAction|null $prefix = null;
 
-    protected string|array|Closure|null $append = null;
-
-    protected ?string $prefix = null;
-
-    protected ?string $suffix = null;
+    /** Append/suffix: conteúdo ou action depois do campo (append é atalho de suffix). */
+    protected string|array|Closure|AbstractAction|null $suffix = null;
 
     protected ?string $placeholder = null;
 
@@ -89,10 +88,11 @@ trait BelongsToHelpers
      * - String simples: texto de ajuda
      * - Array: lista de actions a serem renderizadas
      * - Closure: função que retorna string ou array de actions
+     * - AbstractColumn ou AbstractAction: convertido para payload no getHint()
      *
-     * @param  string|array|Closure|AbstractColumn  $hint  Texto ou array de actions
+     * @param  string|array|Closure|AbstractColumn|AbstractAction  $hint  Texto ou array de actions
      */
-    public function hint(string|array|Closure|AbstractColumn $hint): static
+    public function hint(string|array|Closure|AbstractColumn|AbstractAction $hint): static
     {
         $this->hint[] = $hint;
 
@@ -110,31 +110,26 @@ trait BelongsToHelpers
         return $this;
     }
 
-    /**     * Adiciona conteúdo/ação antes do campo
-     * Pode ser um texto, ícone ou action
+    /**
+     * Conteúdo/ação antes do campo (atalho de prefix).
      */
-    public function prepend(string|array|Closure $content): static
+    public function prepend(string|array|Closure|AbstractAction $content): static
     {
-        $this->prepend = $content;
-
-        return $this;
+        return $this->prefix($content);
     }
 
     /**
-     * Adiciona conteúdo/ação depois do campo
-     * Pode ser um texto, ícone ou action
+     * Conteúdo/ação depois do campo (atalho de suffix).
      */
-    public function append(string|array|Closure $content): static
+    public function append(string|array|Closure|AbstractAction $content): static
     {
-        $this->append = $content;
-
-        return $this;
+        return $this->suffix($content);
     }
 
     /**
-     * Adiciona um prefixo ao campo (ex: R$, +55)
+     * Prefixo ao campo (ex: R$, +55) ou action. Prepend é atalho.
      */
-    public function prefix(string $prefix): static
+    public function prefix(string|array|Closure|AbstractAction $prefix): static
     {
         $this->prefix = $prefix;
 
@@ -142,9 +137,9 @@ trait BelongsToHelpers
     }
 
     /**
-     * Adiciona um sufixo ao campo (ex: kg, m², %)
+     * Sufixo ao campo (ex: kg, m², %) ou action. Append é atalho.
      */
-    public function suffix(string $suffix): static
+    public function suffix(string|array|Closure|AbstractAction $suffix): static
     {
         $this->suffix = $suffix;
 
@@ -180,13 +175,15 @@ trait BelongsToHelpers
     /**
      * Retorna a dica (pode ser string ou array de actions)
      */
-    public function getHint(): string|array|AbstractColumn|null
+    public function getHint(): string|array|null
     {
         $hints = [];
         if (is_array($this->hint)) {
             foreach ($this->hint as $hint) {
                 if ($hint instanceof AbstractColumn) {
                     $hints[] = $hint->toArray($this->getModel());
+                } elseif ($hint instanceof AbstractAction) {
+                    $hints[] = $hint->toArray(null, null);
                 } else {
                     $hints[] = $this->evaluate($hint);
                 }
@@ -195,39 +192,77 @@ trait BelongsToHelpers
             return $hints;
         }
 
-        return $this->evaluate($this->hint);
+        $evaluated = $this->evaluate($this->hint);
+        if ($evaluated instanceof AbstractAction) {
+            return [$evaluated->toArray(null, null)];
+        }
+        if ($evaluated instanceof AbstractColumn) {
+            return [$evaluated->toArray($this->getModel())];
+        }
+
+        return $evaluated;
     }
 
     /**
-     * Retorna o conteúdo prepend
+     * Retorna o conteúdo prepend (mesmo que getPrefix).
      */
     public function getPrepend(): string|array|null
     {
-        return $this->evaluate($this->prepend);
+        return $this->getPrefix();
     }
 
     /**
-     * Retorna o conteúdo append
+     * Retorna o conteúdo append (mesmo que getSuffix).
      */
     public function getAppend(): string|array|null
     {
-        return $this->evaluate($this->append);
+        return $this->getSuffix();
     }
 
     /**
-     * Retorna o prefixo
+     * Normaliza prefix/suffix para string ou array de payloads (para action).
+     *
+     * @return string|array<int, array<string, mixed>>|null
      */
-    public function getPrefix(): ?string
+    private function normalizeAddonValue(mixed $value): string|array|null
     {
-        return $this->evaluate($this->prefix);
+        $evaluated = $this->evaluate($value);
+        if ($evaluated === null) {
+            return null;
+        }
+        if ($evaluated instanceof AbstractAction) {
+            return [$evaluated->toArray(null, null)];
+        }
+        if (is_array($evaluated)) {
+            $out = [];
+            foreach ($evaluated as $item) {
+                if ($item instanceof AbstractAction) {
+                    $out[] = $item->toArray(null, null);
+                } elseif (is_string($item) || is_array($item)) {
+                    $out[] = $item;
+                }
+            }
+
+            return $out;
+        }
+
+        return is_string($evaluated) ? $evaluated : null;
     }
 
     /**
-     * Retorna o sufixo
+     * Retorna o prefixo (string ou array de actions).
      */
-    public function getSuffix(): ?string
+    public function getPrefix(): string|array|null
     {
-        return $this->evaluate($this->suffix);
+        return $this->normalizeAddonValue($this->prefix);
+    }
+
+    /**
+     * Retorna o sufixo (string ou array de actions).
+     */
+    public function getSuffix(): string|array|null
+    {
+        return $this->normalizeAddonValue($this->suffix);
     }
 
     /**

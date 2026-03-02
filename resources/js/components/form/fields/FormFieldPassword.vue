@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-2">
     <Label
-      v-if="field.label"
+      v-if="!labelRenderedByWrapper && field.label"
       :for="field.name"
     >
       {{ field.label }}
@@ -41,12 +41,14 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { inject, ref } from 'vue'
 import { Eye, EyeOff, KeyRound } from 'lucide-vue-next'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useFormField } from '@raptor/composables/useFormField'
 import type { FormField } from '@raptor/types'
+
+const labelRenderedByWrapper = inject('fieldLabelRenderedByWrapper', false)
 
 const props = defineProps<{
   field: FormField

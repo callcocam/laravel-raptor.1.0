@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-2">
     <Label
-      v-if="field.label"
+      v-if="!labelRenderedByWrapper && field.label"
       :for="field.name"
     >
       {{ field.label }}
@@ -27,6 +27,7 @@
 </template>
 
 <script lang="ts" setup>
+import { inject } from 'vue'
 import { Label } from '@/components/ui/label'
 import {
   Select,
@@ -36,6 +37,8 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import type { FormField } from '@raptor/types'
+
+const labelRenderedByWrapper = inject('fieldLabelRenderedByWrapper', false)
 
 defineProps<{
   field: FormField

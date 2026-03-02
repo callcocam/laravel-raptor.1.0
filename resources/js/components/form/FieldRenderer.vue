@@ -1,16 +1,19 @@
 <template>
-  <component
-    v-if="resolvedComponent"
-    :is="resolvedComponent"
-    :field="field"
-    :model-value="modelValue"
-    @update:model-value="emit('update:modelValue', $event)"
-  />
+  <FieldAddonsWrapper :field="field">
+    <component
+      v-if="resolvedComponent"
+      :is="resolvedComponent"
+      :field="field"
+      :model-value="modelValue"
+      @update:model-value="emit('update:modelValue', $event)"
+    />
+  </FieldAddonsWrapper>
 </template>
 
 <script lang="ts" setup>
 import { computed, type Component } from 'vue'
 import ComponentRegistry from '@raptor/utils/ComponentRegistry'
+import FieldAddonsWrapper from '@raptor/components/form/FieldAddonsWrapper.vue'
 import type { FormFieldOrSection } from '@raptor/types'
 
 const props = defineProps<{

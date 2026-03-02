@@ -1,6 +1,6 @@
 <template>
   <div class="space-y-3">
-    <div v-if="field.label" class="text-sm font-medium text-foreground">
+    <div v-if="!labelRenderedByWrapper && field.label" class="text-sm font-medium text-foreground">
       {{ field.label }}
     </div>
     <div :class="formClasses" class="grid grid-cols-1 gap-4">
@@ -72,13 +72,15 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch } from 'vue'
+import { computed, inject, ref, watch } from 'vue'
 import { Search } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 import FieldRenderer from '@raptor/components/form/FieldRenderer.vue'
 import { useFormField } from '@raptor/composables/useFormField'
 import { useGridLayout } from '@raptor/composables/useGridLayout'
 import type { FormField } from '@raptor/types'
+
+const labelRenderedByWrapper = inject('fieldLabelRenderedByWrapper', false)
 
 const props = defineProps<{
   field: FormField & {

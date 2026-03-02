@@ -82,6 +82,18 @@ export interface FormField {
   /** URL para buscar opções ao digitar (POST com q, id?). Quando definido, o select usa modo combobox. */
   searchExecuteUrl?: string
   rows?: number
+  /** Texto de ajuda exibido abaixo do campo */
+  helpText?: string | null
+  /** Dica ou array de textos/actions exibidos abaixo do campo */
+  hint?: string | string[] | FormAction[] | null
+  /** Conteúdo ou action(s) antes do campo */
+  prepend?: string | FormAction | FormAction[] | null
+  /** Conteúdo ou action(s) depois do campo */
+  append?: string | FormAction | FormAction[] | null
+  /** Prefixo (ex.: R$, +55) */
+  prefix?: string | null
+  /** Sufixo (ex.: kg, %) */
+  suffix?: string | null
   [key: string]: unknown
 }
 
@@ -147,6 +159,9 @@ export interface FormActionPayload {
   [key: string]: unknown
 }
 
+/** Alias para ações em contexto de formulário (hint, addons, header, footer). Compatível com ActionRenderer. */
+export type FormAction = FormActionPayload
+
 export interface FormGridLayout {
   gridColumns?: string | null
   columnSpan?: string | null
@@ -179,8 +194,8 @@ export interface FormPayload {
   values: Record<string, unknown>
   submitUrl?: string | null
   submitMethod?: string
-  headerActions?: FormActionPayload[]
-  footerActions?: FormActionPayload[]
+  headerActions?: FormAction[]
+  footerActions?: FormAction[]
   gridLayout?: FormGridLayout
 }
 

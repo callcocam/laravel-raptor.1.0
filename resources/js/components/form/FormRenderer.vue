@@ -19,7 +19,7 @@
             <ActionRenderer
                 v-for="action in footerActions"
                 :key="action.name"
-                :action="(action as TableAction)"
+                :action="action"
                 @click="(e: Event) => onFooterActionClick(action, e)"
             />
         </div>
@@ -34,11 +34,10 @@ import ActionRenderer from '@raptor/components/actions/ActionRenderer.vue';
 import { useGridLayout } from '@raptor/composables/useGridLayout';
 import type {
     FormField,
-    FormActionPayload,
+    FormAction,
     FormGridLayout,
     FormSection,
     FormFieldOrSection,
-    TableAction,
 } from '@raptor/types';
 
 const props = withDefaults(
@@ -47,7 +46,7 @@ const props = withDefaults(
         values?: Record<string, unknown>;
         submitUrl?: string | null;
         submitMethod?: string;
-        footerActions?: FormActionPayload[];
+        footerActions?: FormAction[];
         gridLayout?: FormGridLayout | null;
     }>(),
     {
@@ -126,7 +125,7 @@ function setModelValue(item: FormFieldOrSection, value: unknown): void {
 }
 
 
-function onFooterActionClick(action: FormActionPayload, event: Event) {
+function onFooterActionClick(action: FormAction, event: Event) {
     if (action.type === 'submit') {
         event.preventDefault();
         handleSubmit();
@@ -201,7 +200,7 @@ function deepAssign(
     }
 }
 
-function handleFooterAction(action: FormActionPayload) {
+function handleFooterAction(action: FormAction) {
     if ((action.type === 'url' || action.type === 'cancel') && action.url) {
         if (action.inertia) {
             router.visit(action.url);
