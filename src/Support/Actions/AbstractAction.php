@@ -58,6 +58,14 @@ abstract class AbstractAction
         return $this;
     }
 
+    public function link(): static
+    {
+        $this->component = 'action-link';
+        $this->variant('link');
+
+        return $this;
+    }
+
     public function color(Closure|string|null $color): static
     {
         $this->color = $color;
@@ -75,6 +83,11 @@ abstract class AbstractAction
     public function getVariant(): ?string
     {
         return $this->evaluate($this->variant);
+    }
+
+    public function getComponent(): ?string
+    {
+        return $this->evaluate($this->component);
     }
 
     public function getColor(): ?string
@@ -119,6 +132,7 @@ abstract class AbstractAction
             'name' => $this->getName(),
             'label' => $this->getLabel(),
             'type' => $this->getActionType(),
+            'component' => $this->getComponent(),
             'icon' => $this->toStringIcon(),
             'variant' => $this->getVariant(),
             'color' => $this->getColor(),

@@ -1,7 +1,8 @@
 <template>
-    <Tooltip v-if="iconOnly && action.label">
+    <!-- Com URL: link navegável -->
+    <Tooltip v-if="hasUrl && iconOnly && action.label">
         <TooltipTrigger as-child>
-            <Button :variant="variant" size="sm" class="h-6 w-6 p-0" as-child>
+            <Button :variant="variant" size="sm" class="h-6 w-6 p-0" as-child >
                 <Link
                     v-if="action.inertia !== false && action.url"
                     :href="getUrlWithQueryParams(action.url)"
@@ -9,7 +10,7 @@
                     <DynamicIcon :name="action.icon" />
                 </Link>
                 <a
-                    v-else-if="action.url"
+                    v-else
                     :href="getUrlWithQueryParams(action.url)"
                     :target="action.target ?? '_self'"
                 >
@@ -21,22 +22,55 @@
             <p>{{ action.label }}</p>
         </TooltipContent>
     </Tooltip>
-    <Button v-else :variant="variant" size="sm" class="h-8" as-child>
+    <Button
+        v-else-if="hasUrl"
+        :variant="variant"
+        size="sm"
+        class="h-8"
+        as-child
+    >
         <Link
             v-if="action.inertia !== false && action.url"
             :href="getUrlWithQueryParams(action.url)"
         >
-            <DynamicIcon :name="action.icon" />
-            <span class="ml-1">{{ action.label }}</span>
+            <DynamicIcon v-if="action.icon" :name="action.icon" />
+            <span :class="action.icon ? 'ml-1' : ''">{{ action.label }}</span>
         </Link>
         <a
-            v-else-if="action.url"
+            v-else
             :href="getUrlWithQueryParams(action.url)"
             :target="action.target ?? '_self'"
         >
-            <DynamicIcon :name="action.icon" />
-            <span class="ml-1">{{ action.label }}</span>
+            <DynamicIcon v-if="action.icon" :name="action.icon" />
+            <span :class="action.icon ? 'ml-1' : ''">{{ action.label }}</span>
         </a>
+    </Button>
+    <!-- Sem URL: botão estilo link que emite click (ex.: hint com tooltip) -->
+    <Tooltip v-else-if="action.tooltip">
+        <TooltipTrigger as-child>
+            <Button
+                :variant="variant"
+                size="sm"
+                class="h-8"
+                @click="handleClick"
+            >
+                <DynamicIcon v-if="action.icon" :name="action.icon" />
+                <span :class="action.icon ? 'ml-1' : ''">{{ action.label }}</span>
+            </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+            <p>{{ action.tooltip }}</p>
+        </TooltipContent>
+    </Tooltip>
+    <Button
+        v-else
+        :variant="variant"
+        size="sm"
+        class="h-8"
+        @click="handleClick"
+    >
+        <DynamicIcon v-if="action.icon" :name="action.icon" />
+        <span :class="action.icon ? 'ml-1' : ''">{{ action.label }}</span>
     </Button>
 </template>
 
@@ -55,6 +89,7 @@ export interface ActionLinkProps {
     name: string;
     label: string;
     icon?: string;
+    tooltip?: string;
     variant?:
         | 'default'
         | 'destructive'
@@ -74,7 +109,16 @@ const props = defineProps<{
     iconOnly?: boolean;
 }>();
 
-const variant = computed(() => props.action.variant ?? 'ghost');
+const emit = defineEmits<{
+    (e: 'click', event: Event): void;
+}>();
+
+const variant = computed(() => props.action.variant ?? 'link');
+const hasUrl = computed(() => Boolean(props.action?.url));
+
+function handleClick(event: Event) {
+    emit('click', event);
+}
 
 // Função para adicionar query params atuais à URL
 function getUrlWithQueryParams(baseUrl?: string): string {

@@ -130,6 +130,7 @@ ComponentRegistry.registerBulk({
 ComponentRegistry.registerBulk({
     'action-button': defineAsyncComponent(() => import('@raptor/components/actions/types/ActionButton.vue')),
     'action-link': defineAsyncComponent(() => import('@raptor/components/actions/types/ActionLink.vue')),
+    'link-action': defineAsyncComponent(() => import('@raptor/components/actions/types/ActionLink.vue')),
     'action-confirm': defineAsyncComponent(() => import('@raptor/components/actions/types/ActionConfirm.vue')),
     'action-link-confirm': defineAsyncComponent(() => import('@raptor/components/actions/types/ActionLinkConfirm.vue')),
 })

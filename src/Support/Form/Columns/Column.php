@@ -177,7 +177,7 @@ abstract class Column extends AbstractColumn
             $arr['order'] = $gridConfig['order'];
         }
         $arr['helpText'] = $this->getHelpText();
-        $arr['hint'] = $this->getHint();
+        $arr['hint'] = $this->getHint($model, $request);
         $arr['prepend'] = $this->getPrepend();
         $arr['append'] = $this->getAppend();
         $arr['prefix'] = $this->getPrefix();

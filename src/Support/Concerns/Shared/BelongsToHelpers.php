@@ -11,6 +11,8 @@ namespace Callcocam\LaravelRaptor\Support\Concerns\Shared;
 use Callcocam\LaravelRaptor\Support\AbstractColumn;
 use Callcocam\LaravelRaptor\Support\Actions\AbstractAction;
 use Closure;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
 
 trait BelongsToHelpers
 {
@@ -173,17 +175,19 @@ trait BelongsToHelpers
     }
 
     /**
-     * Retorna a dica (pode ser string ou array de actions)
+     * Retorna a dica (pode ser string ou array de actions).
+     * Com $request, actions como CallbackAction incluem executeUrl no payload.
      */
-    public function getHint(): string|array|null
+    public function getHint(?Model $model = null, ?Request $request = null): string|array|null
     {
         $hints = [];
         if (is_array($this->hint)) {
             foreach ($this->hint as $hint) {
                 if ($hint instanceof AbstractColumn) {
-                    $hints[] = $hint->toArray($this->getModel());
+                    $hints[] = $hint->toArray($model, $request);
                 } elseif ($hint instanceof AbstractAction) {
-                    $hints[] = $hint->toArray(null, null);
+                    $rendered = $hint->render($model, $request);
+                    $hints[] = $rendered ?? $hint->toArray($model, $request);
                 } else {
                     $hints[] = $this->evaluate($hint);
                 }
@@ -194,10 +198,11 @@ trait BelongsToHelpers
 
         $evaluated = $this->evaluate($this->hint);
         if ($evaluated instanceof AbstractAction) {
-            return [$evaluated->toArray(null, null)];
+            $rendered = $evaluated->render($model, $request);
+            return [$rendered ?? $evaluated->toArray($model, $request)];
         }
         if ($evaluated instanceof AbstractColumn) {
-            return [$evaluated->toArray($this->getModel())];
+            return [$evaluated->toArray($model, $request)];
         }
 
         return $evaluated;

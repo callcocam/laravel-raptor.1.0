@@ -153,6 +153,8 @@ export interface FormActionPayload {
   tooltip?: string | null
   disabled?: boolean
   url?: string | null
+  /** URL para POST da action (ex.: CallbackAction no backend). */
+  executeUrl?: string | null
   inertia?: boolean
   target?: string
   method?: string

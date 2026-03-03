@@ -1,30 +1,36 @@
 <!--
   FormFieldLabelWithHint - Label + hint discreto (texto ou actions) para usar em todos os campos.
-  Usado pelo FieldAddonsWrapper para centralizar label e hint; assim os field components não precisam repetir.
+  Usado pelo FieldAddonsWrapper. Ações de hint usam botão nativo inline (alinhamento estável) e
+  executam executeUrl no clique quando existir (CallbackAction no backend).
 -->
 <template>
   <div
     v-if="hasContent"
-    class="flex items-center gap-2"
+    class="flex w-full flex-nowrap items-center justify-between gap-2"
   >
     <Label
       v-if="label"
       :for="forId ?? undefined"
+      class="min-w-0 shrink truncate"
     >
       {{ label }}
     </Label>
     <span
       v-if="hintContent"
-      class="text-xs text-muted-foreground"
+      class="flex shrink-0 flex-nowrap items-center gap-1 text-xs text-muted-foreground"
     >
       <template v-for="(item, i) in normalizedHints" :key="i">
-        <span v-if="isStringItem(item)">{{ item }}</span>
-        <ActionRenderer
+        <span v-if="isStringItem(item)" class="whitespace-nowrap">{{ item }}</span>
+        <button
           v-else
-          :action="item as FormAction"
-          class="inline-flex"
-          @click="(e: Event) => $emit('action-click', item, e)"
-        />
+          type="button"
+          class="cursor-pointer whitespace-nowrap rounded border-0 bg-transparent p-0 text-left text-xs text-muted-foreground underline-offset-2 hover:underline focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:opacity-50"
+          :disabled="(item as FormAction).disabled"
+          :title="(item as FormAction).tooltip ?? undefined"
+          @click="onHintActionClick(item as FormAction, $event)"
+        >
+          {{ (item as FormAction).label }}
+        </button>
       </template>
     </span>
   </div>
@@ -32,8 +38,8 @@
 
 <script lang="ts" setup>
 import { computed } from 'vue'
+import { router } from '@inertiajs/vue3'
 import { Label } from '@/components/ui/label'
-import ActionRenderer from '@raptor/components/actions/ActionRenderer.vue'
 import type { FormAction } from '@raptor/types'
 
 const props = withDefaults(
@@ -49,9 +55,16 @@ const props = withDefaults(
   },
 )
 
-defineEmits<{
+const emit = defineEmits<{
   (e: 'action-click', action: FormAction, event: Event): void
 }>()
+
+function onHintActionClick(action: FormAction, event: Event) {
+  emit('action-click', action, event)
+  if (action.executeUrl) {
+    router.post(action.executeUrl)
+  }
+}
 
 function isStringItem(value: unknown): value is string {
   return typeof value === 'string'
