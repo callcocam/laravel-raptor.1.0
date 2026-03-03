@@ -1,9 +1,5 @@
 <template>
-  <div class="space-y-2">
-    <Label v-if="!labelRenderedByWrapper && field.label" :for="field.name">
-      {{ field.label }}
-    </Label>
-    <Popover v-model:open="popoverOpen">
+  <Popover v-model:open="popoverOpen">
       <PopoverAnchor as-child>
         <div class="relative cursor-text" role="combobox" :aria-expanded="popoverOpen"
           :aria-controls="`${field.name}-listbox`" @click="onTriggerClick">
@@ -48,12 +44,10 @@
         </p>
       </PopoverContent>
     </Popover>
-  </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, nextTick, ref, watch } from 'vue'
-import { Label } from '@/components/ui/label'
+import { computed, nextTick, ref, watch } from 'vue'
 import { Input } from '@/components/ui/input'
 import {
   Popover,
@@ -63,7 +57,6 @@ import {
 import type { FormField } from '@raptor/types'
 import { router, usePage } from '@inertiajs/vue3'
 
-const labelRenderedByWrapper = inject('fieldLabelRenderedByWrapper', false)
 
 const props = defineProps<{
   field: FormField

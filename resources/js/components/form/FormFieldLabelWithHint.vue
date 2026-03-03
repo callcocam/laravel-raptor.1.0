@@ -1,7 +1,6 @@
 <!--
   FormFieldLabelWithHint - Label + hint discreto (texto ou actions) para usar em todos os campos.
-  Usado pelo FieldAddonsWrapper. Ações de hint usam botão nativo inline (alinhamento estável) e
-  executam executeUrl no clique quando existir (CallbackAction no backend).
+  Recebe o field diretamente e decide internamente se mostra label, hint ou ambos.
 -->
 <template>
   <div
@@ -21,16 +20,11 @@
     >
       <template v-for="(item, i) in normalizedHints" :key="i">
         <span v-if="isStringItem(item)" class="whitespace-nowrap">{{ item }}</span>
-        <button
+        <ActionRenderer
           v-else
-          type="button"
-          class="cursor-pointer whitespace-nowrap rounded border-0 bg-transparent p-0 text-left text-xs text-muted-foreground underline-offset-2 hover:underline focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:opacity-50"
-          :disabled="(item as FormAction).disabled"
-          :title="(item as FormAction).tooltip ?? undefined"
-          @click="onHintActionClick(item as FormAction, $event)"
-        >
-          {{ (item as FormAction).label }}
-        </button>
+          :action="item"
+          @click="(e: Event) => onHintActionClick(item as FormAction, e)"
+        />
       </template>
     </span>
   </div>
@@ -40,24 +34,21 @@
 import { computed } from 'vue'
 import { router } from '@inertiajs/vue3'
 import { Label } from '@/components/ui/label'
-import type { FormAction } from '@raptor/types'
+import ActionRenderer from '@raptor/components/actions/ActionRenderer.vue'
+import type { FormField, FormAction } from '@raptor/types'
 
-const props = withDefaults(
-  defineProps<{
-    label?: string | null
-    hint?: string | string[] | FormAction[] | null
-    forId?: string | null
-  }>(),
-  {
-    label: null,
-    hint: null,
-    forId: null,
-  },
-)
+const props = defineProps<{
+  field: FormField | null
+}>()
 
 const emit = defineEmits<{
   (e: 'action-click', action: FormAction, event: Event): void
 }>()
+
+const label = computed(() => props.field?.label ?? null)
+const forId = computed(() =>
+  typeof props.field?.name === 'string' ? props.field.name : null,
+)
 
 function onHintActionClick(action: FormAction, event: Event) {
   emit('action-click', action, event)
@@ -71,12 +62,7 @@ function isStringItem(value: unknown): value is string {
 }
 
 function normalizeHint(
-  value:
-    | string
-    | string[]
-    | FormAction[]
-    | null
-    | undefined,
+  value: string | string[] | FormAction[] | null | undefined,
 ): Array<string | FormAction> {
   if (value == null) return []
   if (typeof value === 'string') return value ? [value] : []
@@ -93,12 +79,12 @@ function normalizeHint(
 }
 
 const normalizedHints = computed(() =>
-  normalizeHint(props.hint as string | string[] | FormAction[] | null | undefined),
+  normalizeHint(props.field?.hint as string | string[] | FormAction[] | null | undefined),
 )
 
 const hintContent = computed(() => normalizedHints.value.length > 0)
 
 const hasContent = computed(
-  () => (props.label && props.label.length > 0) || hintContent.value,
+  () => (label.value && label.value.length > 0) || hintContent.value,
 )
 </script>

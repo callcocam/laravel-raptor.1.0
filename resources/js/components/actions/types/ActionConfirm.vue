@@ -3,7 +3,7 @@
     <Tooltip v-if="iconOnly && action.label">
       <TooltipTrigger as-child>
         <AlertDialogTrigger as-child>
-          <Button :variant="variant" size="sm" class="h-6 w-6 p-0">
+          <Button :variant="variant" :size="size">
             <DynamicIcon :name="action.icon" />
           </Button>
         </AlertDialogTrigger>
@@ -13,7 +13,7 @@
       </TooltipContent>
     </Tooltip>
     <AlertDialogTrigger v-else as-child>
-      <Button :variant="variant" size="sm"  >
+      <Button :variant="variant" :size="size">
         <DynamicIcon :name="action.icon" />
         <span class="ml-1">{{ action.label }}</span>
       </Button>
@@ -74,6 +74,7 @@ export interface ActionConfirmProps {
   icon?: string
   variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link'
   url?: string
+  size?: "icon" | "default" | "sm" | "lg" | "icon-sm" | "icon-lg" | null | undefined
   executeUrl?: string
   method?: 'get' | 'post' | 'put' | 'patch' | 'delete'
   title?: string
@@ -99,7 +100,10 @@ const emit = defineEmits<{
 
 const confirmationInput = ref('')
 
+console.log('ActionConfirm props:', props.action)
+
 const variant = computed(() => props.action.variant ?? 'ghost')
+const size = computed(() => props.action.size ?? 'sm')
 
 const canConfirm = computed(() => {
   if (!props.action.requireTextConfirmation) return true

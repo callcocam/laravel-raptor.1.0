@@ -1,33 +1,26 @@
 <template>
-  <div class="space-y-2">
-    <Label
-      v-if="!labelRenderedByWrapper && field.label"
-      :for="field.name"
-    >
-      {{ field.label }}
-    </Label>
-    <Input
+  <Input
       :id="field.name"
+      :data-slot="inInputGroup ? 'input-group-control' : undefined"
       :model-value="maskedValue"
       type="text"
       :placeholder="(field.placeholder as string) ?? (field.label as string) ?? undefined"
       :disabled="(field.disabled as boolean) ?? false"
       :readonly="(field.readonly as boolean) ?? false"
-      class="w-full"
+      :class="cn('w-full', inInputGroup && 'flex-1 rounded-none border-0 shadow-none focus-visible:ring-0 dark:bg-transparent')"
       :maxlength="maxLength"
       @input="handleInput"
-    />
-  </div>
+  />
 </template>
 
 <script lang="ts" setup>
 import { computed, inject } from 'vue'
+import type { ComputedRef } from 'vue'
+import { cn } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { useFormField } from '@raptor/composables/useFormField'
 import type { FormField } from '@raptor/types'
 
-const labelRenderedByWrapper = inject('fieldLabelRenderedByWrapper', false)
 
 const props = defineProps<{
   field: FormField
@@ -37,6 +30,8 @@ const props = defineProps<{
 const emit = defineEmits<{
   'update:modelValue': [value: unknown]
 }>()
+
+const inInputGroup = inject<ComputedRef<boolean>>('inInputGroup', { value: false } as ComputedRef<boolean>)
 
 const { emitChange } = useFormField(emit)
 

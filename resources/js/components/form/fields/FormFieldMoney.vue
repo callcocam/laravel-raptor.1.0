@@ -1,41 +1,35 @@
 <template>
-  <div class="space-y-2">
-    <Label
-      v-if="!labelRenderedByWrapper && field.label"
-      :for="field.name"
+  <div :class="inInputGroup ? 'flex flex-1 min-w-0 items-center' : 'flex rounded-md shadow-sm'">
+    <div
+      :class="inInputGroup
+        ? 'inline-flex items-center pl-3 pr-1 text-muted-foreground text-sm font-medium shrink-0'
+        : 'inline-flex items-center px-3 rounded-l-md border border-r-0 border-input bg-muted text-muted-foreground text-sm font-medium'"
     >
-      {{ field.label }}
-    </Label>
-    <div class="flex rounded-md shadow-sm">
-      <div
-        class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-input bg-muted text-muted-foreground text-sm font-medium"
-      >
-        {{ currencySymbol }}
-      </div>
-      <Input
-        :id="field.name"
-        :model-value="displayValue"
-        type="text"
-        inputmode="decimal"
-        :placeholder="formattedPlaceholder"
-        :disabled="(field.disabled as boolean) ?? false"
-        :readonly="(field.readonly as boolean) ?? false"
-        class="w-full rounded-l-none"
-        @input="handleInput"
-        @blur="handleBlur"
-      />
+      {{ currencySymbol }}
     </div>
+    <Input
+      :id="field.name"
+      :data-slot="inInputGroup ? 'input-group-control' : undefined"
+      :model-value="displayValue"
+      type="text"
+      inputmode="decimal"
+      :placeholder="formattedPlaceholder"
+      :disabled="(field.disabled as boolean) ?? false"
+      :readonly="(field.readonly as boolean) ?? false"
+      :class="inInputGroup ? 'flex-1 rounded-none border-0 shadow-none focus-visible:ring-0 dark:bg-transparent' : 'w-full rounded-l-none'"
+      @input="handleInput"
+      @blur="handleBlur"
+    />
   </div>
 </template>
 
 <script lang="ts" setup>
 import { computed, inject, ref, watch } from 'vue'
+import type { ComputedRef } from 'vue'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { useFormField } from '@raptor/composables/useFormField'
 import type { FormField } from '@raptor/types'
 
-const labelRenderedByWrapper = inject('fieldLabelRenderedByWrapper', false)
 
 const props = defineProps<{
   field: FormField
@@ -45,6 +39,8 @@ const props = defineProps<{
 const emit = defineEmits<{
   'update:modelValue': [value: unknown]
 }>()
+
+const inInputGroup = inject<ComputedRef<boolean>>('inInputGroup', { value: false } as ComputedRef<boolean>)
 
 const { emitChange } = useFormField(emit)
 

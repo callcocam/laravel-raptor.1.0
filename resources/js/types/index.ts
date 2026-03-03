@@ -158,6 +158,7 @@ export interface FormActionPayload {
   inertia?: boolean
   target?: string
   method?: string
+  actionType?: string
   [key: string]: unknown
 }
 

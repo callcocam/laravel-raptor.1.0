@@ -1,56 +1,44 @@
 <!--
   FieldAddonsWrapper - Wrapper for form fields with label+hint, helpText, prepend, append, prefix, suffix.
-  Usa FormFieldLabelWithHint para label+hint em todos os campos; os field components podem esconder a label via inject.
+  Uses InputGroup + InputGroupAddon when there are addons. Provides 'inInputGroup' for child fields.
 -->
 <template>
   <div class="space-y-2">
     <FormFieldLabelWithHint
       v-if="showLabelWithHint"
-      :label="labelForField"
-      :hint="rawField.hint"
-      :for-id="forIdForField"
+      :field="rawField"
       @action-click="(a, e) => $emit('action-click', a, e)"
     />
-    <div :class="hasAddons ? 'flex items-end rounded-md shadow-sm' : ''">
-      <div
-        v-if="leftAddonContent"
-        class="inline-flex h-9 shrink-0 items-center gap-1 px-3 rounded-l-md border border-r-0 border-input bg-muted text-muted-foreground text-sm"
-      >
+
+    <InputGroup v-if="hasAddons">
+      <InputGroupAddon v-if="leftAddonContent">
         <template v-for="(item, i) in normalizedLeftAddons" :key="i">
-          <span v-if="isStringItem(item)" class="inline">{{ item }}</span>
+          <InputGroupText v-if="isStringItem(item)">{{ item }}</InputGroupText>
           <ActionRenderer
             v-else
             :action="item as FormAction"
-            class="inline-flex"
             @click="(e: Event) => $emit('action-click', item, e)"
           />
         </template>
-      </div>
+      </InputGroupAddon>
 
-      <div :class="hasAddons ? (leftAddonContent ? 'rounded-none flex-1 min-w-0' : 'rounded-l-md flex-1 min-w-0') : ''">
-        <slot />
-      </div>
+      <slot />
 
-      <div
-        v-if="rightAddonContent"
-        class="inline-flex h-9 shrink-0 items-center gap-1 px-3 rounded-r-md border border-l-0 border-input bg-muted text-muted-foreground text-sm -ml-2"
-      >
+      <InputGroupAddon v-if="rightAddonContent" align="inline-end">
         <template v-for="(item, i) in normalizedRightAddons" :key="i">
-          <span v-if="isStringItem(item)" class="inline">{{ item }}</span>
+          <InputGroupText v-if="isStringItem(item)">{{ item }}</InputGroupText>
           <ActionRenderer
             v-else
             :action="item as FormAction"
-            class="inline-flex"
             @click="(e: Event) => $emit('action-click', item, e)"
           />
         </template>
-      </div>
-    </div>
+      </InputGroupAddon>
+    </InputGroup>
 
-    <p
-      v-if="helpText"
-      class="text-sm text-muted-foreground"
-    >
+    <slot v-else />
+
+    <p v-if="helpText" class="text-sm text-muted-foreground">
       {{ helpText }}
     </p>
   </div>
@@ -60,6 +48,11 @@
 import { computed, provide } from 'vue'
 import ActionRenderer from '@raptor/components/actions/ActionRenderer.vue'
 import FormFieldLabelWithHint from '@raptor/components/form/FormFieldLabelWithHint.vue'
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupText,
+} from '@/components/ui/input-group'
 import type {
   FormField,
   FormFieldOrSection,
@@ -94,13 +87,6 @@ const showLabelWithHint = computed(
     (!!rawField.value?.label || hasHintContent.value),
 )
 
-const labelForField = computed(() => rawField.value?.label ?? null)
-
-const forIdForField = computed(() =>
-  typeof rawField.value?.name === 'string' ? rawField.value.name : null,
-)
-
-provide('fieldLabelRenderedByWrapper', true)
 
 function isActionLike(value: unknown): value is FormAction {
   if (value == null || typeof value !== 'object') return false
@@ -150,6 +136,8 @@ const rightAddonContent = computed(
 const hasAddons = computed(
   () => leftAddonContent.value || rightAddonContent.value,
 )
+
+provide('inInputGroup', hasAddons)
 
 const helpText = computed(() => {
   const t = rawField.value?.helpText

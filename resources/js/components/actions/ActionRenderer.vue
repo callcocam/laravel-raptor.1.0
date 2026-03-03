@@ -77,7 +77,7 @@ const actionTypeMap: Record<string, string> = {
 }
 
 const resolvedComponent = computed(() => {
-  let name = props.action.component
+  let name = props.action.component as string | undefined
   if (name && ComponentRegistry.get(name)) return ComponentRegistry.get(name)
   
   // Tenta actionType primeiro
@@ -104,6 +104,8 @@ const resolvedComponent = computed(() => {
   return ComponentRegistry.get('action-button') ?? null
 })
 
+
+console.log('ActionRenderer props:', resolvedComponent.value)
 const handleClick = (event: Event) => {
   // Re-emite o evento de clique para o pai 
   emit('click', event)
